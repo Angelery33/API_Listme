@@ -1,0 +1,30 @@
+services:
+  listme:
+    image: listme:latest
+    container_name: listme
+    ports:
+      - "8089:8089"
+    environment:
+      - LISTME_DB_URL=jdbc:postgresql://postgres:5432/list_me
+      - LISTME_DB_USERNAME=admin
+      - LISTME_DB_PASSWORD=angelc45
+      - LISTME_JPA_DDL_AUTO=update
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: listme-db
+    environment:
+      - POSTGRES_DB=list_me
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=angelc45
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+
+volumes:
+  postgres-data:

@@ -41,7 +41,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponseDTO> handleDataIntegrity(DataIntegrityViolationException ex) {
-        String message = "Error de integridad: Ya existe un registro con esos datos o faltan campos obligatorios.";
+        String cause = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage();
+        String message = "Error de integridad: Ya existe un registro con esos datos o faltan campos obligatorios. Detalles: " + cause;
         ErrorResponseDTO response = new ErrorResponseDTO(
                 HttpStatus.CONFLICT.value(),
                 message,

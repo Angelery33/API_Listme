@@ -57,6 +57,62 @@ public class ItemImageService {
         image.setRemoteImageUrl(dto.getRemoteImageUrl());
         image.setImageUri(dto.getImageUri());
         image.setItem(item);
+        
+        Boolean isFav = dto.getIsFavorite();
+        if (isFav != null && isFav) {
+            image.setIsFavorite(true);
+            itemImageRepository.findByItemIdItem(dto.getIdItem())
+                .forEach(img -> img.setIsFavorite(false));
+            itemImageRepository.flush();
+        } else {
+            image.setIsFavorite(false);
+        }
+        
+        return mapToDTO(itemImageRepository.save(image));
+    }
+
+    @Transactional
+    public ItemImageDTO updateImage(Long id, ItemImageDTO dto) {
+        ItemImage image = itemImageRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Image not found"));
+        validateLibraryWriteAccess(image.getItem().getLibrary().getIdLibrary());
+
+        if (dto.getImageUri() != null) {
+            image.setImageUri(dto.getImageUri());
+        }
+        if (dto.getRemoteImageUrl() != null) {
+            image.setRemoteImageUrl(dto.getRemoteImageUrl());
+        }
+        
+        Boolean isFav = dto.getIsFavorite();
+        if (isFav != null) {
+            if (isFav) {
+                itemImageRepository.findByItemIdItem(image.getItem().getIdItem())
+                    .forEach(img -> img.setIsFavorite(false));
+                itemImageRepository.flush();
+                image.setIsFavorite(true);
+            } else {
+                image.setIsFavorite(false);
+            }
+        }
+
+        return mapToDTO(itemImageRepository.save(image));
+    }
+
+    @Transactional
+    public ItemImageDTO setFavorite(Long itemId, Long imageId) {
+        ItemImage image = itemImageRepository.findById(imageId)
+                .orElseThrow(() -> new ResourceNotFoundException("Image not found"));
+        if (!image.getItem().getIdItem().equals(itemId)) {
+            throw new ResourceNotFoundException("Image not found for this item");
+        }
+        validateLibraryWriteAccess(image.getItem().getLibrary().getIdLibrary());
+
+        itemImageRepository.findByItemIdItem(itemId)
+            .forEach(img -> img.setIsFavorite(false));
+        itemImageRepository.flush();
+        image.setIsFavorite(true);
+
         return mapToDTO(itemImageRepository.save(image));
     }
 
@@ -74,6 +130,7 @@ public class ItemImageService {
         dto.setIdItem(image.getItem().getIdItem());
         dto.setImageUri(image.getImageUri());
         dto.setRemoteImageUrl(image.getRemoteImageUrl());
+        dto.setIsFavorite(image.getIsFavorite());
         return dto;
     }
 }

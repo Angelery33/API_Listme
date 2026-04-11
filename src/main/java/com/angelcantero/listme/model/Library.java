@@ -16,7 +16,7 @@ public class Library {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    @Column(name = "library_id") // changed from id_library
+    @Column(name = "id_library")
     private Long idLibrary;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -27,16 +27,16 @@ public class Library {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "library_editors",
-            joinColumns = @JoinColumn(name = "library_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
+            joinColumns = @JoinColumn(name = "library_id", referencedColumnName = "id_library"),
+            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id")
     )
     private Set<Usuario> editors = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "library_viewers",
-            joinColumns = @JoinColumn(name = "library_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
+            joinColumns = @JoinColumn(name = "library_id", referencedColumnName = "id_library"),
+            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id")
     )
     private Set<Usuario> viewers = new HashSet<>();
 

@@ -14,11 +14,11 @@ public class ItemImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    @Column(name = "image_id")
+    @Column(name = "id_image")
     private Long idImage;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "item_id", nullable = false)
+    @JoinColumn(name = "id_item", nullable = false)
     @ToString.Exclude
     private Item item;
 
@@ -26,4 +26,6 @@ public class ItemImage {
     private String imageUri;
 
     private String remoteImageUrl;
+
+    private Boolean isFavorite = false;
 }

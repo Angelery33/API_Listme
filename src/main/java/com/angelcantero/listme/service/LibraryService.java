@@ -14,7 +14,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import com.angelcantero.listme.dto.LibraryReorderItemDTO;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +35,17 @@ public class LibraryService {
     public List<LibraryDTO> getAllLibraries() {
         Usuario currentUser = getCurrentUser();
         return libraryRepository.findAllAccessibleByUser(currentUser).stream()
-                .map(library -> mapToDTOWithFlags(library, currentUser))
+                .map(library -> {
+                    LibraryDTO dto = mapToDTO(library);
+                    boolean isOwner = library.getUsuario().getId().equals(currentUser.getId());
+                    boolean isEditor = library.getEditors().stream().anyMatch(u -> u.getId().equals(currentUser.getId()));
+                    boolean isViewer = library.getViewers().stream().anyMatch(u -> u.getId().equals(currentUser.getId()));
+                    dto.setOwner(isOwner);
+                    dto.setShared(isEditor || isViewer);
+                    dto.setCanEdit(isOwner || isEditor);
+                    dto.setItemCount((long) library.getItems().size());
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -70,6 +82,22 @@ public class LibraryService {
         Library library = libraryRepository.findOwnedById(id, getCurrentUser())
                 .orElseThrow(() -> new ResourceNotFoundException("Only the owner can delete the library"));
         libraryRepository.delete(library);
+    }
+
+    @Transactional
+    public void reorderLibraries(List<LibraryReorderItemDTO> items) {
+        Usuario currentUser = getCurrentUser();
+        List<Long> ids = items.stream().map(LibraryReorderItemDTO::getId).collect(Collectors.toList());
+        Map<Long, Integer> positionMap = items.stream()
+                .collect(Collectors.toMap(LibraryReorderItemDTO::getId, LibraryReorderItemDTO::getPosition));
+
+        List<Library> libraries = libraryRepository.findAllById(ids);
+        for(Library lib : libraries) {
+            if(lib.getUsuario().getId().equals(currentUser.getId())) {
+                lib.setPosition(positionMap.get(lib.getIdLibrary()));
+            }
+        }
+        libraryRepository.saveAll(libraries);
     }
 
     public void shareLibrary(Long id, com.angelcantero.listme.dto.ShareRequest shareRequest) {
@@ -109,6 +137,7 @@ public class LibraryService {
         dto.setOwner(isOwner);
         dto.setShared(isEditor || isViewer);
         dto.setCanEdit(isOwner || isEditor);
+        dto.setItemCount((long) library.getItems().size());
         return dto;
     }
 

@@ -7,9 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LibraryWithItemCountDTO {
-    private Long idLibrary;
-    private String name;
-    private Long itemCount;
+public class LibraryReorderItemDTO {
+    private Long id;
     private int position;
 }

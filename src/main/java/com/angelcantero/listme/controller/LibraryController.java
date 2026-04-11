@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import com.angelcantero.listme.dto.LibraryReorderItemDTO;
 
 /**
  * <p><strong>LibraryController</strong></p>
@@ -55,6 +56,12 @@ public class LibraryController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         libraryService.deleteLibrary(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/reorder")
+    public ResponseEntity<Void> reorder(@Valid @RequestBody List<LibraryReorderItemDTO> items) {
+        libraryService.reorderLibraries(items);
         return ResponseEntity.noContent().build();
     }
 }

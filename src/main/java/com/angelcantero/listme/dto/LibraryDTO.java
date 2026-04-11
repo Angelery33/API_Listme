@@ -32,4 +32,5 @@ public class LibraryDTO {
     private boolean isOwner;
     private boolean isShared;
     private boolean canEdit;
+    private Long itemCount;
 }

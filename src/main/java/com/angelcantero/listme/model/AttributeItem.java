@@ -18,7 +18,7 @@ public class AttributeItem {
     private Long attributeItemId;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "item_id", nullable = false)
+    @JoinColumn(name = "id_item", nullable = false)
     @ToString.Exclude
     private Item item;
 

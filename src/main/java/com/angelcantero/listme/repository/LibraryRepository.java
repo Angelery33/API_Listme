@@ -13,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface LibraryRepository extends JpaRepository<Library, Long> {
     
-    @Query("SELECT DISTINCT l FROM Library l LEFT JOIN l.editors e LEFT JOIN l.viewers v WHERE l.usuario = :usuario OR :usuario MEMBER OF l.editors OR :usuario MEMBER OF l.viewers")
+    @Query("SELECT DISTINCT l FROM Library l LEFT JOIN FETCH l.items i LEFT JOIN l.editors e LEFT JOIN l.viewers v WHERE l.usuario = :usuario OR :usuario MEMBER OF l.editors OR :usuario MEMBER OF l.viewers")
     List<Library> findAllAccessibleByUser(@Param("usuario") Usuario usuario);
 
     @Query("SELECT l FROM Library l LEFT JOIN l.editors e LEFT JOIN l.viewers v WHERE l.idLibrary = :id AND (l.usuario = :usuario OR :usuario MEMBER OF l.editors OR :usuario MEMBER OF l.viewers)")

@@ -36,6 +36,16 @@ public class ItemImageController {
         return new ResponseEntity<>(service.createImage(dto), HttpStatus.CREATED);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ItemImageDTO> update(@PathVariable Long id, @Valid @RequestBody ItemImageDTO dto) {
+        return ResponseEntity.ok(service.updateImage(id, dto));
+    }
+
+    @PutMapping("/item/{itemId}/favorite/{imageId}")
+    public ResponseEntity<ItemImageDTO> setFavorite(@PathVariable Long itemId, @PathVariable Long imageId) {
+        return ResponseEntity.ok(service.setFavorite(itemId, imageId));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.deleteImage(id);

@@ -1,6 +1,7 @@
 package com.angelcantero.listme.controller;
 
 import com.angelcantero.listme.config.Config;
+import com.angelcantero.listme.dto.ChangePasswordRequest;
 import com.angelcantero.listme.dto.LoginRequest;
 import com.angelcantero.listme.dto.LoginResponse;
 import com.angelcantero.listme.dto.RegisterRequest;
@@ -16,10 +17,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -89,5 +95,55 @@ public class AuthController {
                             .build());
                 })
                 .orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<Usuario> getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        return ResponseEntity.ok(usuario);
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<Usuario> updateProfile(@RequestBody Usuario updatedUser) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        usuario.setUsername(updatedUser.getUsername());
+        usuarioRepository.save(usuario);
+
+        return ResponseEntity.ok(usuario);
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), usuario.getPassword())) {
+            return ResponseEntity.badRequest().body("Contraseña actual incorrecta");
+        }
+
+        usuario.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        usuarioRepository.save(usuario);
+
+        return ResponseEntity.ok("Contraseña actualizada correctamente");
+    }
+
+    @DeleteMapping("/account")
+    public ResponseEntity<?> deleteAccount() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        usuarioRepository.delete(usuario);
+        return ResponseEntity.ok("Cuenta eliminada correctamente");
     }
 }

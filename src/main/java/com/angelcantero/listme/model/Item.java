@@ -14,11 +14,11 @@ public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    @Column(name = "item_id")
+    @Column(name = "id_item")
     private Long idItem;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "library_id", nullable = false)
+    @JoinColumn(name = "id_library", nullable = false)
     @ToString.Exclude
     private Library library;
 

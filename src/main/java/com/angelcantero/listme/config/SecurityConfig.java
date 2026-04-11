@@ -54,9 +54,9 @@ public class SecurityConfig {
 
                         // Roles
                         .requestMatchers(HttpMethod.GET, Config.API_URL + "/**").hasAnyRole("STANDARD", "ADMIN")
-                        .requestMatchers(HttpMethod.POST, Config.API_URL + "/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, Config.API_URL + "/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, Config.API_URL + "/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, Config.API_URL + "/**").hasAnyRole("STANDARD", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, Config.API_URL + "/**").hasAnyRole("STANDARD", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, Config.API_URL + "/**").hasAnyRole("STANDARD", "ADMIN")
 
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())

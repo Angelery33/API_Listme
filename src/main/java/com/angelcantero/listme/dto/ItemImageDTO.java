@@ -16,4 +16,5 @@ public class ItemImageDTO {
 
     private String imageUri;
     private String remoteImageUrl;
+    private Boolean isFavorite = false;
 }

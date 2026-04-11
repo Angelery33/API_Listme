@@ -1,6 +1,7 @@
 package com.angelcantero.listme.service;
 
 import com.angelcantero.listme.model.RefreshToken;
+import com.angelcantero.listme.model.Usuario;
 import com.angelcantero.listme.repository.RefreshTokenRepository;
 import com.angelcantero.listme.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,11 +29,21 @@ public class RefreshTokenService {
 
     @Transactional
     public RefreshToken createRefreshToken(Long userId) {
-        RefreshToken refreshToken = RefreshToken.builder()
-                .usuario(usuarioRepository.findById(userId).get())
-                .expiryDate(Instant.now().plusMillis(refreshTokenDurationMs))
-                .token(UUID.randomUUID().toString())
-                .build();
+        Usuario usuario = usuarioRepository.findById(userId).get();
+        Optional<RefreshToken> existingToken = refreshTokenRepository.findByUsuario(usuario);
+
+        RefreshToken refreshToken;
+        if (existingToken.isPresent()) {
+            refreshToken = existingToken.get();
+            refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
+            refreshToken.setToken(UUID.randomUUID().toString());
+        } else {
+            refreshToken = RefreshToken.builder()
+                    .usuario(usuario)
+                    .expiryDate(Instant.now().plusMillis(refreshTokenDurationMs))
+                    .token(UUID.randomUUID().toString())
+                    .build();
+        }
 
         return refreshTokenRepository.save(refreshToken);
     }
