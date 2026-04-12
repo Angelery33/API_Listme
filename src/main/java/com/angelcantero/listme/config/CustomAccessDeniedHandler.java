@@ -13,6 +13,14 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/**
+ * <p><strong>CustomAccessDeniedHandler</strong></p>
+ * <p>Manejo personalizado de acceso denegado.</p>
+ * <p>Retorna JSON con error 403 cuando el usuario no tiene permisos.</p>
+ *
+ * @author Angel Cantero
+ * @since 1.0.0
+ */
 @Component
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 

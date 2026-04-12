@@ -21,25 +21,48 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * <p><strong>ItemImageService</strong></p>
+ * <p>Servicio para la gestión de imágenes de ítems.</p>
+ * <p>Maneja las operaciones CRUD y marking de imagenes favoritas.</p>
+ *
+ * @author Angel Cantero
+ * @since 1.0.0
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ItemImageService {
+    
     private final ItemImageRepository itemImageRepository;
     private final ItemRepository itemRepository;
-    private final LibraryService libraryService; // Changed from LibraryRepository
-    private final UsuarioRepository usuarioRepository; // Kept for potential future use or if other methods not shown use it.
+    private final LibraryService libraryService;
+    private final UsuarioRepository usuarioRepository;
 
-    // Removed getCurrentUser() as LibraryService handles user context
-
+    /**
+     * Valida acceso de lectura a la biblioteca.
+     *
+     * @param libraryId ID de la biblioteca
+     */
     private void validateLibraryReadAccess(Long libraryId) {
         libraryService.validateLibraryReadAccess(libraryId);
     }
 
+    /**
+     * Valida acceso de escritura a la biblioteca.
+     *
+     * @param libraryId ID de la biblioteca
+     */
     private void validateLibraryWriteAccess(Long libraryId) {
         libraryService.validateLibraryWriteAccess(libraryId);
     }
 
+    /**
+     * Obtiene todas las imágenes de un ítem.
+     *
+     * @param itemId ID del ítem
+     * @return lista de imágenes
+     */
     public List<ItemImageDTO> getImagesByItemId(Long itemId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new ResourceNotFoundException("Item not found"));
@@ -47,6 +70,12 @@ public class ItemImageService {
         return itemImageRepository.findByItemIdItem(itemId).stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
+    /**
+     * Crea una nueva imagen para un ítem.
+     *
+     * @param dto datos de la imagen
+     * @return la imagen creada
+     */
     @Transactional
     public ItemImageDTO createImage(ItemImageDTO dto) {
         Item item = itemRepository.findById(dto.getIdItem())
@@ -71,6 +100,13 @@ public class ItemImageService {
         return mapToDTO(itemImageRepository.save(image));
     }
 
+    /**
+     * Actualiza una imagen existente.
+     *
+     * @param id ID de la imagen
+     * @param dto nuevos datos
+     * @return la imagen actualizada
+     */
     @Transactional
     public ItemImageDTO updateImage(Long id, ItemImageDTO dto) {
         ItemImage image = itemImageRepository.findById(id)
@@ -99,10 +135,22 @@ public class ItemImageService {
         return mapToDTO(itemImageRepository.save(image));
     }
 
+    /**
+     * Establece una imagen como favorita.
+     *
+     * @param itemId ID del ítem
+     * @param imageId ID de la imagen
+     * @return la imagen marcada como favorita
+     */
     @Transactional
     public ItemImageDTO setFavorite(Long itemId, Long imageId) {
         ItemImage image = itemImageRepository.findById(imageId)
                 .orElseThrow(() -> new ResourceNotFoundException("Image not found"));
+        
+        if (image.getItem() == null) {
+            throw new ResourceNotFoundException("La imagen no tiene un ítem asociado");
+        }
+        
         if (!image.getItem().getIdItem().equals(itemId)) {
             throw new ResourceNotFoundException("Image not found for this item");
         }
@@ -116,14 +164,25 @@ public class ItemImageService {
         return mapToDTO(itemImageRepository.save(image));
     }
 
+    /**
+     * Elimina una imagen.
+     *
+     * @param id ID de la imagen
+     */
     @Transactional
     public void deleteImage(Long id) {
         ItemImage image = itemImageRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Image not found"));
-        validateLibraryWriteAccess(image.getItem().getLibrary().getIdLibrary()); // Changed validation method
-        itemImageRepository.delete(image); // Changed from deleteById
+        validateLibraryWriteAccess(image.getItem().getLibrary().getIdLibrary());
+        itemImageRepository.delete(image);
     }
 
+    /**
+     * Convierte una entidad a DTO.
+     *
+     * @param image la entidad
+     * @return el DTO
+     */
     private ItemImageDTO mapToDTO(ItemImage image) {
         ItemImageDTO dto = new ItemImageDTO();
         dto.setIdImage(image.getIdImage());

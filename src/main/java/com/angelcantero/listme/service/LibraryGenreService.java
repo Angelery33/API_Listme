@@ -19,35 +19,71 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * <p><strong>LibraryGenreService</strong></p>
+ * <p>Servicio para la gestión de géneros de bibliotecas.</p>
+ * <p>Administra los géneros dentro de cada biblioteca.</p>
+ *
+ * @author Angel Cantero
+ * @since 1.0.0
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class LibraryGenreService {
+    
     private final LibraryGenreRepository libraryGenreRepository;
     private final LibraryRepository libraryRepository;
     private final LibraryService libraryService;
     private final UsuarioRepository usuarioRepository;
 
+    /**
+     * Obtiene el usuario actual.
+     *
+     * @return el usuario
+     */
     private Usuario getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return usuarioRepository.findByUsername(auth.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
+    /**
+     * Valida acceso de lectura.
+     *
+     * @param libraryId ID de la biblioteca
+     */
     private void validateLibraryReadAccess(Long libraryId) {
         libraryService.validateLibraryReadAccess(libraryId);
     }
 
+    /**
+     * Valida acceso de escritura.
+     *
+     * @param libraryId ID de la biblioteca
+     */
     private void validateLibraryWriteAccess(Long libraryId) {
         libraryService.validateLibraryWriteAccess(libraryId);
     }
 
+    /**
+     * Obtiene todos los géneros de una biblioteca.
+     *
+     * @param libraryId ID de la biblioteca
+     * @return lista de géneros
+     */
     public List<LibraryGenreDTO> getGenresByLibraryId(Long libraryId) {
         validateLibraryReadAccess(libraryId);
         return libraryGenreRepository.findByLibraryIdLibrary(libraryId)
                 .stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
+    /**
+     * Crea un nuevo género.
+     *
+     * @param dto datos del género
+     * @return el género creado
+     */
     @Transactional
     public LibraryGenreDTO createGenre(LibraryGenreDTO dto) {
         validateLibraryWriteAccess(dto.getLibraryId());
@@ -59,6 +95,11 @@ public class LibraryGenreService {
         return mapToDTO(libraryGenreRepository.save(genre));
     }
 
+    /**
+     * Elimina un género.
+     *
+     * @param id ID del género
+     */
     @Transactional
     public void deleteGenre(Long id) {
         LibraryGenre genre = libraryGenreRepository.findById(id)
@@ -67,6 +108,12 @@ public class LibraryGenreService {
         libraryGenreRepository.delete(genre);
     }
 
+    /**
+     * Convierte una entidad a DTO.
+     *
+     * @param genre la entidad
+     * @return el DTO
+     */
     private LibraryGenreDTO mapToDTO(LibraryGenre genre) {
         LibraryGenreDTO dto = new LibraryGenreDTO();
         dto.setId(genre.getId());

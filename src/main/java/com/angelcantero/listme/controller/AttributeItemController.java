@@ -13,11 +13,11 @@ import java.util.List;
 
 /**
  * <p><strong>AttributeItemController</strong></p>
- * <p>Gestión de los valores de atributos asignados a los ítems.</p>
- * Created on: 2026-03-20
+ * <p>Controlador para la gestión de atributos de ítems.</p>
+ * <p>Endpoints para crear, listar y eliminar atributos personalizados de ítems.</p>
  *
  * @author Angel Cantero
- * @version 1.0.0
+ * @since 1.0.0
  */
 @RestController
 @RequestMapping(Config.API_URL + "/attribute-items")
@@ -26,16 +26,34 @@ public class AttributeItemController {
 
     private final AttributeItemService service;
 
+    /**
+     * Obtiene todos los atributos de un ítem.
+     *
+     * @param itemId ID del ítem
+     * @return lista de atributos
+     */
     @GetMapping("/item/{itemId}")
     public ResponseEntity<List<AttributeItemDTO>> findByItemId(@PathVariable Long itemId) {
         return ResponseEntity.ok(service.getByItemId(itemId));
     }
 
+    /**
+     * Crea un nuevo atributo para un ítem.
+     *
+     * @param dto datos del atributo
+     * @return el atributo creado
+     */
     @PostMapping
     public ResponseEntity<AttributeItemDTO> create(@Valid @RequestBody AttributeItemDTO dto) {
         return new ResponseEntity<>(service.create(dto), HttpStatus.CREATED);
     }
 
+    /**
+     * Elimina un atributo.
+     *
+     * @param id ID del atributo
+     * @return sin contenido
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);

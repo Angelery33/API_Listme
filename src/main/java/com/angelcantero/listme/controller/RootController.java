@@ -6,15 +6,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * <p><strong>RootController</strong></p>
- * <p>Controlador raíz para comprobar el estado de la API y enlaces rápidos.</p>
- * Created on: 2026-03-20
+ * <p>Controlador raíz para comprobar el estado de la API.</p>
+ * <p>Endpoints públicos de información sobre la API.</p>
  *
  * @author Angel Cantero
- * @version 1.0.0
+ * @since 1.0.0
  */
 @RestController
 public class RootController {
 
+    /**
+     * Verificación de estado de la API.
+     *
+     * @return mensaje de estado
+     */
     @GetMapping(path = "/", produces = MediaType.TEXT_PLAIN_VALUE)
     public String root() {
         return String.join(

@@ -13,6 +13,14 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/**
+ * <p><strong>CustomAuthenticationEntryPoint</strong></p>
+ * <p>Manejo personalizado de autenticación fallida.</p>
+ * <p>Retorna JSON con error 401 cuando falla la autenticación.</p>
+ *
+ * @author Angel Cantero
+ * @since 1.0.0
+ */
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 

@@ -25,6 +25,14 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+/**
+ * <p><strong>SecurityConfig</strong></p>
+ * <p>Configuración de seguridad de la aplicación.</p>
+ * <p>Define la cadena de filtros, proveedores de autenticación y políticas CORS.</p>
+ *
+ * @author Angel Cantero
+ * @since 1.0.0
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity

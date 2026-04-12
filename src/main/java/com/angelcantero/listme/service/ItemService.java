@@ -19,6 +19,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * <p><strong>ItemService</strong></p>
+ * <p>Servicio para la gestión de ítems.</p>
+ * <p>Proporciona operaciones CRUD para ítems dentro de bibliotecas.</p>
+ *
+ * @author Angel Cantero
+ * @since 1.0.0
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -29,37 +37,82 @@ public class ItemService {
     private final LibraryService libraryService;
     private final UsuarioRepository usuarioRepository;
 
+    /**
+     * Obtiene el usuario actualmente autenticado.
+     *
+     * @return el usuario actual
+     */
     private Usuario getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return usuarioRepository.findByUsername(auth.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
+    /**
+     * Valida que el usuario tenga acceso de lectura a la biblioteca.
+     *
+     * @param libraryId ID de la biblioteca
+     */
     private void validateLibraryReadAccess(Long libraryId) {
         libraryService.validateLibraryReadAccess(libraryId);
     }
 
+    /**
+     * Valida que el usuario tenga acceso de escritura a la biblioteca.
+     *
+     * @param libraryId ID de la biblioteca
+     */
     private void validateLibraryWriteAccess(Long libraryId) {
         libraryService.validateLibraryWriteAccess(libraryId);
     }
 
+    /**
+     * Obtiene todos los ítems accesibles por el usuario.
+     *
+     * @return lista de ítems
+     */
     public List<ItemDTO> getAllItems() {
         return itemRepository.findAllAccessibleByUser(getCurrentUser()).stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
+    /**
+     * Obtiene los ítems de una biblioteca específica.
+     *
+     * @param libraryId ID de la biblioteca
+     * @return lista de ítems de la biblioteca
+     */
     public List<ItemDTO> getItemsByLibraryId(Long libraryId) {
         validateLibraryReadAccess(libraryId);
         return itemRepository.findByLibraryIdLibrary(libraryId).stream().map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Obtiene un ítem por su ID.
+     *
+     * @param id ID del ítem
+     * @return el ítem encontrado
+     * @throws ResourceNotFoundException si no existe
+     */
     public ItemDTO getItemById(Long id) {
         Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Item not found with id: " + id));
+        
+        if (item.getLibrary() == null) {
+            throw new ResourceNotFoundException("El ítem no tiene una biblioteca asociada");
+        }
+        
         validateLibraryReadAccess(item.getLibrary().getIdLibrary());
         return mapToDTO(item);
     }
 
+    /**
+     * Crea un nuevo ítem.
+     *
+     * @param createDTO datos del ítem a crear
+     * @return el ítem creado
+     * @throws ResourceNotFoundException si la biblioteca no existe
+     */
     @Transactional
     public ItemDTO createItem(ItemDTO createDTO) {
         validateLibraryWriteAccess(createDTO.getIdLibrary());
@@ -78,6 +131,14 @@ public class ItemService {
         return mapToDTO(itemRepository.save(item));
     }
 
+    /**
+     * Actualiza un ítem existente.
+     *
+     * @param id ID del ítem a actualizar
+     * @param updateDTO nuevos datos del ítem
+     * @return el ítem actualizado
+     * @throws ResourceNotFoundException si el ítem no existe
+     */
     @Transactional
     public ItemDTO updateItem(Long id, ItemDTO updateDTO) {
         Item item = itemRepository.findById(id)
@@ -99,6 +160,12 @@ public class ItemService {
         return mapToDTO(itemRepository.save(item));
     }
 
+    /**
+     * Elimina un ítem.
+     *
+     * @param id ID del ítem a eliminar
+     * @throws ResourceNotFoundException si no existe
+     */
     @Transactional
     public void deleteItem(Long id) {
         Item item = itemRepository.findById(id)
@@ -106,6 +173,15 @@ public class ItemService {
         validateLibraryWriteAccess(item.getLibrary().getIdLibrary());
         itemRepository.deleteById(id);
     }
+
+    /**
+     * Popula una entidad Item desde un DTO.
+     *
+     * @param item la entidad a poblar
+     * @param dto el DTO con los datos
+     * @param library la biblioteca
+     * @param parentItem el ítem padre (si aplica)
+     */
     private void populateEntityFromDTO(Item item, ItemDTO dto, Library library, Item parentItem) {
         item.setName(dto.getName());
         item.setDescription(dto.getDescription());
@@ -143,6 +219,12 @@ public class ItemService {
         item.setLibrary(library);
     }
 
+    /**
+     * Convierte una entidad Item a DTO.
+     *
+     * @param item la entidad
+     * @return el DTO
+     */
     private ItemDTO mapToDTO(Item item) {
         ItemDTO dto = new ItemDTO();
         dto.setIdItem(item.getIdItem());

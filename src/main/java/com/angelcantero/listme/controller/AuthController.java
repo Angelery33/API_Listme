@@ -6,6 +6,8 @@ import com.angelcantero.listme.dto.LoginRequest;
 import com.angelcantero.listme.dto.LoginResponse;
 import com.angelcantero.listme.dto.RegisterRequest;
 import com.angelcantero.listme.dto.TokenRefreshRequest;
+import com.angelcantero.listme.exception.InvalidRefreshTokenException;
+import com.angelcantero.listme.exception.ResourceNotFoundException;
 import com.angelcantero.listme.model.RefreshToken;
 import com.angelcantero.listme.model.Roles;
 import com.angelcantero.listme.model.Usuario;
@@ -30,6 +32,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * <p><strong>AuthController</strong></p>
+ * <p>Controlador para la autenticación y gestión de usuarios.</p>
+ * <p>Endpoints para registro, login,刷新 tokens, cambio de contraseña y eliminación de cuenta.</p>
+ *
+ * @author Angel Cantero
+ * @since 1.0.0
+ */
 @RestController
 @RequestMapping(Config.API_URL + "/auth")
 @RequiredArgsConstructor
@@ -42,6 +52,12 @@ public class AuthController {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Registra un nuevo usuario en el sistema.
+     *
+     * @param request datos de registro
+     * @return mensaje de éxito o error
+     */
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
         if (usuarioRepository.existsByUsername(request.getUsername())) {
@@ -64,6 +80,12 @@ public class AuthController {
         return ResponseEntity.ok("Usuario registrado exitosamente");
     }
 
+    /**
+     * Autentica un usuario y retorna tokens JWT.
+     *
+     * @param request credenciales
+     * @return tokens de acceso y refresh
+     */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> authenticate(@Valid @RequestBody LoginRequest request) {
         authenticationManager.authenticate(
@@ -73,7 +95,8 @@ public class AuthController {
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
         String jwtToken = jwtService.generateToken(userDetails);
         
-        Usuario usuario = usuarioRepository.findByUsername(request.getUsername()).get();
+        Usuario usuario = usuarioRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(usuario.getId());
 
         return ResponseEntity.ok(LoginResponse.builder()
@@ -82,6 +105,12 @@ public class AuthController {
                 .build());
     }
 
+    /**
+     * Refresca el token de acceso usando el refresh token.
+     *
+     * @param request包含 refresh token
+     * @return nuevos tokens de acceso
+     */
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody TokenRefreshRequest request) {
         return refreshTokenService.findByToken(request.getRefreshToken())
@@ -94,24 +123,35 @@ public class AuthController {
                             .refreshToken(request.getRefreshToken())
                             .build());
                 })
-                .orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
+                .orElseThrow(() -> new InvalidRefreshTokenException("Refresh token no válido o no existe en la base de datos"));
     }
 
+    /**
+     * Obtiene el usuario actualmente autenticado.
+     *
+     * @return datos del usuario
+     */
     @GetMapping("/me")
     public ResponseEntity<Usuario> getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         Usuario usuario = usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
         return ResponseEntity.ok(usuario);
     }
 
+    /**
+     * Actualiza el perfil del usuario actual.
+     *
+     * @param updatedUser nuevos datos del usuario
+     * @return usuario actualizado
+     */
     @PutMapping("/profile")
     public ResponseEntity<Usuario> updateProfile(@RequestBody Usuario updatedUser) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         Usuario usuario = usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         usuario.setUsername(updatedUser.getUsername());
         usuarioRepository.save(usuario);
@@ -119,12 +159,18 @@ public class AuthController {
         return ResponseEntity.ok(usuario);
     }
 
+    /**
+     * Cambia la contraseña del usuario actual.
+     *
+     * @param request contraseñas actual y nueva
+     * @return mensaje de éxito
+     */
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         Usuario usuario = usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), usuario.getPassword())) {
             return ResponseEntity.badRequest().body("Contraseña actual incorrecta");
@@ -136,12 +182,17 @@ public class AuthController {
         return ResponseEntity.ok("Contraseña actualizada correctamente");
     }
 
+    /**
+     * Elimina la cuenta del usuario actual.
+     *
+     * @return mensaje de éxito
+     */
     @DeleteMapping("/account")
     public ResponseEntity<?> deleteAccount() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         Usuario usuario = usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         usuarioRepository.delete(usuario);
         return ResponseEntity.ok("Cuenta eliminada correctamente");

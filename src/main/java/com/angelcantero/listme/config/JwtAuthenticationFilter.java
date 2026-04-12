@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,13 +18,29 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * <p><strong>JwtAuthenticationFilter</strong></p>
+ * <p>Filtro para autenticar solicitudes usando JWT.</p>
+ * <p>Procesa el header Authorization y establece la autenticación en el contexto.</p>
+ *
+ * @author Angel Cantero
+ * @since 1.0.0
+ */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
+    /**
+     * Procesa cada solicitud para autenticar mediante JWT.
+     *
+     * @param request solicitud HTTP
+     * @param response respuesta HTTP
+     * @param filterChain cadena de filtros
+     */
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
@@ -55,7 +72,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            // Log or handle token parsing errors
+            log.warn("Error al procesar token JWT: {}", e.getMessage());
         }
         filterChain.doFilter(request, response);
     }

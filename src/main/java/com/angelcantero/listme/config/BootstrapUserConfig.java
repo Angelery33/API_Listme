@@ -11,6 +11,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+/**
+ * <p><strong>BootstrapUserConfig</strong></p>
+ * <p>Configuración para crear usuario administrador inicial.</p>
+ * <p>Si se proporcionan credenciales, crea un usuario admin al iniciar la app.</p>
+ *
+ * @author Angel Cantero
+ * @since 1.0.0
+ */
 @Configuration
 public class BootstrapUserConfig {
 
