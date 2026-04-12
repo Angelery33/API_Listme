@@ -32,7 +32,7 @@ public class ItemImage {
     /**
      * Ítem al que pertenece la imagen.
      */
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "id_item", nullable = false)
     @ToString.Exclude
     private Item item;

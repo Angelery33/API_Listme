@@ -3,6 +3,8 @@ package com.angelcantero.listme.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 /**
  * <p><strong>Item</strong></p>
  * <p>Entidad que representa un ítem individual dentro de una biblioteca.</p>
@@ -218,4 +220,12 @@ public class Item {
      * Edición específica del producto.
      */
     private String edition;
+
+    /**
+     * Imágenes asociadas al ítem.
+     * Relación uno-a-muchos: un ítem puede tener múltiples imágenes.
+     */
+    @OneToMany(mappedBy = "item", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @ToString.Exclude
+    private List<ItemImage> images;
 }
