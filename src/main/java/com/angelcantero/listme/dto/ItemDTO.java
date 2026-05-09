@@ -1,7 +1,11 @@
 package com.angelcantero.listme.dto;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,11 +37,13 @@ public class ItemDTO {
      * Nombre del ítem.
      */
     @NotBlank(message = "El nombre es obligatorio")
+    @Size(min = 1, max = 200, message = "El nombre debe tener entre 1 y 200 caracteres")
     private String name;
 
     /**
      * Descripción del ítem.
      */
+    @Size(max = 2000, message = "La descripción no puede exceder 2000 caracteres")
     private String description;
 
     /**
@@ -56,8 +62,10 @@ public class ItemDTO {
     private String imagePath;
 
     /**
-     * Puntuación personal.
+     * Puntuación personal (0-10).
      */
+    @DecimalMin(value = "0.0", message = "La puntuación debe ser >= 0")
+    @DecimalMax(value = "10.0", message = "La puntuación debe ser <= 10")
     private Double score;
 
     /**
@@ -86,8 +94,9 @@ public class ItemDTO {
     private Long acquisitionDate;
 
     /**
-     * Precio pagado.
+     * Precio pagado (debe ser positivo o cero).
      */
+    @DecimalMin(value = "0.0", message = "El precio debe ser >= 0")
     private Double price;
 
     /**
@@ -106,53 +115,63 @@ public class ItemDTO {
     private String progressUnit;
 
     /**
-     * Progreso actual.
+     * Progreso actual (debe ser >= 0).
      */
+    @PositiveOrZero(message = "El progreso actual debe ser >= 0")
     private Integer currentProgress;
 
     /**
-     * Progreso total.
+     * Progreso total (debe ser > 0).
      */
+    @PositiveOrZero(message = "El progreso total debe ser >= 0")
     private Integer totalProgress;
 
     /**
-     * Temporada actual.
+     * Temporada actual (debe ser >= 0).
      */
+    @PositiveOrZero(message = "La temporada debe ser >= 0")
     private Integer season;
 
     /**
-     * Capítulo actual.
+     * Capítulo actual (debe ser >= 0).
      */
+    @PositiveOrZero(message = "El capítulo debe ser >= 0")
     private Integer chapter;
 
     /**
-     * Página actual.
+     * Página actual (debe ser >= 0).
      */
+    @PositiveOrZero(message = "La página debe ser >= 0")
     private Integer page;
 
     /**
-     * Volumen actual.
+     * Volumen actual (debe ser >= 0).
      */
+    @PositiveOrZero(message = "El volumen debe ser >= 0")
     private Integer volume;
 
     /**
-     * Total de temporadas.
+     * Total de temporadas (debe ser >= 0).
      */
+    @PositiveOrZero(message = "El total de temporadas debe ser >= 0")
     private Integer totalSeason;
 
     /**
-     * Total de capítulos.
+     * Total de capítulos (debe ser >= 0).
      */
+    @PositiveOrZero(message = "El total de capítulos debe ser >= 0")
     private Integer totalChapter;
 
     /**
-     * Total de páginas.
+     * Total de páginas (debe ser >= 0).
      */
+    @PositiveOrZero(message = "El total de páginas debe ser >= 0")
     private Integer totalPage;
 
     /**
-     * Total de volúmenes.
+     * Total de volúmenes (debe ser >= 0).
      */
+    @PositiveOrZero(message = "El total de volúmenes debe ser >= 0")
     private Integer totalVolume;
 
     /**
@@ -166,8 +185,10 @@ public class ItemDTO {
     private Long parentId;
 
     /**
-     * Puntuación externa.
+     * Puntuación externa (0-10).
      */
+    @DecimalMin(value = "0.0", message = "La calificación externa debe ser >= 0")
+    @DecimalMax(value = "10.0", message = "La calificación externa debe ser <= 10")
     private Double externalRating;
 
     /**

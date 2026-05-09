@@ -117,7 +117,9 @@ public class LibraryGenreService {
     private LibraryGenreDTO mapToDTO(LibraryGenre genre) {
         LibraryGenreDTO dto = new LibraryGenreDTO();
         dto.setId(genre.getId());
-        dto.setLibraryId(genre.getLibrary().getIdLibrary());
+        if (genre.getLibrary() != null) {
+            dto.setLibraryId(genre.getLibrary().getIdLibrary());
+        }
         dto.setName(genre.getName());
         return dto;
     }

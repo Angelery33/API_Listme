@@ -1,6 +1,7 @@
 package com.angelcantero.listme.config;
 
 import com.angelcantero.listme.service.JwtService;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -71,6 +72,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
+        } catch (ExpiredJwtException e) {
+            log.warn("Token JWT expirado para usuario: {}", e.getClaims().getSubject());
+            response.setHeader("X-Token-Expired", "true");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\":\"Token expired. Please refresh your token.\"}");
+            return;
         } catch (Exception e) {
             log.warn("Error al procesar token JWT: {}", e.getMessage());
         }

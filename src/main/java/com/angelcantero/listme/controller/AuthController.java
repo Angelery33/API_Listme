@@ -15,6 +15,8 @@ import com.angelcantero.listme.repository.UsuarioRepository;
 import com.angelcantero.listme.service.JwtService;
 import com.angelcantero.listme.service.RefreshTokenService;
 import jakarta.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * <p><strong>AuthController</strong></p>
  * <p>Controlador para la autenticación y gestión de usuarios.</p>
- * <p>Endpoints para registro, login,刷新 tokens, cambio de contraseña y eliminación de cuenta.</p>
+ * <p>Endpoints para registro, login, refresco de tokens, cambio de contraseña y eliminación de cuenta.</p>
  *
  * @author Angel Cantero
  * @since 1.0.0
@@ -107,9 +109,10 @@ public class AuthController {
 
     /**
      * Refresca el token de acceso usando el refresh token.
+     * Genera un nuevo refresh token para mayor seguridad.
      *
-     * @param request包含 refresh token
-     * @return nuevos tokens de acceso
+     * @param request contiene el refresh token
+     * @return nuevos tokens de acceso y refresh
      */
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody TokenRefreshRequest request) {
@@ -118,45 +121,70 @@ public class AuthController {
                 .map(RefreshToken::getUsuario)
                 .map(usuario -> {
                     String token = jwtService.generateToken(userDetailsService.loadUserByUsername(usuario.getUsername()));
+                    // Generar nuevo refresh token para mayor seguridad (refresh token rotation)
+                    RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(usuario.getId());
                     return ResponseEntity.ok(LoginResponse.builder()
                             .accessToken(token)
-                            .refreshToken(request.getRefreshToken())
+                            .refreshToken(newRefreshToken.getToken())
                             .build());
                 })
                 .orElseThrow(() -> new InvalidRefreshTokenException("Refresh token no válido o no existe en la base de datos"));
     }
 
     /**
-     * Obtiene el usuario actualmente autenticado.
+     * Obtiene el usuario actualmente autenticado (sin exponer la contraseña).
      *
-     * @return datos del usuario
+     * @return datos del usuario sin contraseña
      */
     @GetMapping("/me")
-    public ResponseEntity<Usuario> getCurrentUser() {
+    public ResponseEntity<?> getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         Usuario usuario = usuarioRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
-        return ResponseEntity.ok(usuario);
+
+        // Devolver DTO sin contraseña
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", usuario.getId());
+        response.put("username", usuario.getUsername());
+        response.put("email", usuario.getEmail());
+        response.put("rol", usuario.getRol());
+
+        return ResponseEntity.ok(response);
     }
 
     /**
      * Actualiza el perfil del usuario actual.
      *
-     * @param updatedUser nuevos datos del usuario
-     * @return usuario actualizado
+     * @param updateRequest nuevos datos del usuario
+     * @return usuario actualizado sin contraseña
      */
     @PutMapping("/profile")
-    public ResponseEntity<Usuario> updateProfile(@RequestBody Usuario updatedUser) {
+    public ResponseEntity<?> updateProfile(@Valid @RequestBody Map<String, String> updateRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         Usuario usuario = usuarioRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
-        usuario.setUsername(updatedUser.getUsername());
+        String newUsername = updateRequest.get("username");
+        if (newUsername != null && !newUsername.isEmpty()) {
+            // Validar que el nuevo username no exista en otro usuario
+            if (!usuario.getUsername().equals(newUsername) &&
+                usuarioRepository.existsByUsername(newUsername)) {
+                return ResponseEntity.badRequest().body("Error: El nombre de usuario ya está en uso");
+            }
+            usuario.setUsername(newUsername);
+        }
+
         usuarioRepository.save(usuario);
 
-        return ResponseEntity.ok(usuario);
+        // Devolver sin contraseña
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", usuario.getId());
+        response.put("username", usuario.getUsername());
+        response.put("email", usuario.getEmail());
+
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -166,7 +194,7 @@ public class AuthController {
      * @return mensaje de éxito
      */
     @PostMapping("/change-password")
-    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
+    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         Usuario usuario = usuarioRepository.findByUsername(username)

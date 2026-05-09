@@ -86,17 +86,14 @@ public class ItemImageService {
         image.setRemoteImageUrl(dto.getRemoteImageUrl());
         image.setImageUri(dto.getImageUri());
         image.setItem(item);
-        
+
         Boolean isFav = dto.getIsFavorite();
         if (isFav != null && isFav) {
-            image.setIsFavorite(true);
-            itemImageRepository.findByItemIdItem(dto.getIdItem())
-                .forEach(img -> img.setIsFavorite(false));
-            itemImageRepository.flush();
+            setFavoriteImage(dto.getIdItem(), image);
         } else {
             image.setIsFavorite(false);
         }
-        
+
         return mapToDTO(itemImageRepository.save(image));
     }
 
@@ -119,14 +116,11 @@ public class ItemImageService {
         if (dto.getRemoteImageUrl() != null) {
             image.setRemoteImageUrl(dto.getRemoteImageUrl());
         }
-        
+
         Boolean isFav = dto.getIsFavorite();
         if (isFav != null) {
             if (isFav) {
-                itemImageRepository.findByItemIdItem(image.getItem().getIdItem())
-                    .forEach(img -> img.setIsFavorite(false));
-                itemImageRepository.flush();
-                image.setIsFavorite(true);
+                setFavoriteImage(image.getItem().getIdItem(), image);
             } else {
                 image.setIsFavorite(false);
             }
@@ -146,20 +140,17 @@ public class ItemImageService {
     public ItemImageDTO setFavorite(Long itemId, Long imageId) {
         ItemImage image = itemImageRepository.findById(imageId)
                 .orElseThrow(() -> new ResourceNotFoundException("Image not found"));
-        
+
         if (image.getItem() == null) {
             throw new ResourceNotFoundException("La imagen no tiene un ítem asociado");
         }
-        
+
         if (!image.getItem().getIdItem().equals(itemId)) {
             throw new ResourceNotFoundException("Image not found for this item");
         }
         validateLibraryWriteAccess(image.getItem().getLibrary().getIdLibrary());
 
-        itemImageRepository.findByItemIdItem(itemId)
-            .forEach(img -> img.setIsFavorite(false));
-        itemImageRepository.flush();
-        image.setIsFavorite(true);
+        setFavoriteImage(itemId, image);
 
         return mapToDTO(itemImageRepository.save(image));
     }
@@ -178,6 +169,19 @@ public class ItemImageService {
     }
 
     /**
+     * Establece una imagen como favorita, desfavoreciendo las demás.
+     *
+     * @param itemId ID del ítem
+     * @param image imagen a marcar como favorita
+     */
+    private void setFavoriteImage(Long itemId, ItemImage image) {
+        itemImageRepository.findByItemIdItem(itemId)
+                .forEach(img -> img.setIsFavorite(false));
+        itemImageRepository.flush();
+        image.setIsFavorite(true);
+    }
+
+    /**
      * Convierte una entidad a DTO.
      *
      * @param image la entidad
@@ -186,7 +190,9 @@ public class ItemImageService {
     private ItemImageDTO mapToDTO(ItemImage image) {
         ItemImageDTO dto = new ItemImageDTO();
         dto.setIdImage(image.getIdImage());
-        dto.setIdItem(image.getItem().getIdItem());
+        if (image.getItem() != null) {
+            dto.setIdItem(image.getItem().getIdItem());
+        }
         dto.setImageUri(image.getImageUri());
         dto.setRemoteImageUrl(image.getRemoteImageUrl());
         dto.setIsFavorite(image.getIsFavorite());

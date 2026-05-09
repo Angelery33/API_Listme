@@ -40,5 +40,5 @@ public class ItemImageDTO {
     /**
      * Indica si es la imagen favorita.
      */
-    private Boolean isFavorite = false;
+    private boolean isFavorite = false;
 }

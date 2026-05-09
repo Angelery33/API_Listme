@@ -2,6 +2,7 @@ package com.angelcantero.listme.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,10 +32,12 @@ public class RegisterRequest {
 
     /**
      * Contraseña del usuario.
-     * Debe tener al menos 8 caracteres.
+     * Debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y caracteres especiales.
      */
-    @NotBlank(message = "La contraseña es obligatorio")
+    @NotBlank(message = "La contraseña es obligatoria")
     @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$",
+             message = "La contraseña debe contener mayúsculas, minúsculas, números y caracteres especiales (@$!%*?&)")
     private String password;
 
     /**

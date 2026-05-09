@@ -129,10 +129,12 @@ public class AttributeItemService {
         AttributeItemDTO dto = new AttributeItemDTO();
         dto.setAttributeItemId(entity.getAttributeItemId());
         dto.setValue(entity.getValue());
-        if (entity.getItem() != null)
+        if (entity.getItem() != null) {
             dto.setIdItem(entity.getItem().getIdItem());
-        if (entity.getAttributeType() != null)
+        }
+        if (entity.getAttributeType() != null) {
             dto.setAttributeTypeId(entity.getAttributeType().getAttributeTypeId());
+        }
         return dto;
     }
 }
