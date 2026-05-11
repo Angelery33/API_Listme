@@ -237,6 +237,7 @@ public class ItemImageService {
         }
         dto.setImageUri(image.getImageUri());
         dto.setRemoteImageUrl(image.getRemoteImageUrl());
+        dto.setFavorite(image.getIsFavorite());
         return dto;
     }
 }
