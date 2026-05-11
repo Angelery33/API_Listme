@@ -171,6 +171,18 @@ public class ItemService {
         Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Item not found with id: " + id));
         validateLibraryWriteAccess(item.getLibrary().getIdLibrary());
+        deleteItemRecursively(id);
+    }
+
+    /**
+     * Elimina recursivamente un ítem y todos sus descendientes para evitar
+     * violaciones de la FK self-reference (parentId).
+     */
+    private void deleteItemRecursively(Long id) {
+        List<Item> children = itemRepository.findByParentId(id);
+        for (Item child : children) {
+            deleteItemRecursively(child.getIdItem());
+        }
         itemRepository.deleteById(id);
     }
 

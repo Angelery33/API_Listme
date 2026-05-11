@@ -30,6 +30,14 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findByLibraryIdLibrary(Long libraryId);
 
     /**
+     * Busca todos los ítems hijos directos de un ítem padre.
+     *
+     * @param parentId el ID del ítem padre
+     * @return lista de ítems hijos
+     */
+    List<Item> findByParentId(Long parentId);
+
+    /**
      * Busca todos los ítems accesibles por un usuario.
      * Incluye ítems de sus bibliotecas propias y las compartidas con él.
      *

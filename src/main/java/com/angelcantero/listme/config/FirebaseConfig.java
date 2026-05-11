@@ -33,7 +33,7 @@ public class FirebaseConfig {
                 GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
                 FirebaseOptions options = FirebaseOptions.builder()
                         .setCredentials(credentials)
-                        .setStorageBucket("listme-app.appspot.com")
+                        .setStorageBucket("listme-app.firebasestorage.app")
                         .build();
 
                 return FirebaseApp.initializeApp(options);

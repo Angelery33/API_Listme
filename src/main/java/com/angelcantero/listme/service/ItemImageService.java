@@ -172,6 +172,7 @@ public class ItemImageService {
 
         ItemImage image = new ItemImage();
         image.setRemoteImageUrl(remoteUrl);
+        image.setImageUri(remoteUrl);
         image.setItem(item);
         image.setIsFavorite(false);
 
