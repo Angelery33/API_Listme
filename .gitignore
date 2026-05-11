@@ -35,3 +35,13 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Firebase Credentials ###
+firebase-adminsdk.json
+src/main/resources/firebase-adminsdk.json
+**/firebase-adminsdk*.json
+
+### Environment Variables ###
+.env
+.env.local
+application-local.properties
