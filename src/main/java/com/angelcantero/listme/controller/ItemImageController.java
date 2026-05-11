@@ -5,10 +5,13 @@ import com.angelcantero.listme.dto.ItemImageDTO;
 import com.angelcantero.listme.service.ItemImageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -22,6 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping(Config.API_URL + "/images")
 @RequiredArgsConstructor
+@Slf4j
 public class ItemImageController {
 
     private final ItemImageService service;
@@ -46,6 +50,30 @@ public class ItemImageController {
     @PostMapping
     public ResponseEntity<ItemImageDTO> create(@Valid @RequestBody ItemImageDTO dto) {
         return new ResponseEntity<>(service.createImage(dto), HttpStatus.CREATED);
+    }
+
+    /**
+     * Sube una imagen a Firebase Storage y crea su registro.
+     *
+     * @param file archivo de imagen
+     * @param itemId ID del ítem
+     * @return la imagen creada con URL remota
+     */
+    @PostMapping("/upload")
+    public ResponseEntity<ItemImageDTO> uploadImage(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("itemId") Long itemId) {
+        try {
+            log.info("Subiendo imagen para ítem: {}", itemId);
+            ItemImageDTO result = service.uploadImage(file, itemId);
+            return new ResponseEntity<>(result, HttpStatus.CREATED);
+        } catch (IOException e) {
+            log.error("Error al subir imagen: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } catch (IllegalArgumentException e) {
+            log.warn("Validación de archivo fallida: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     /**

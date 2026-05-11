@@ -17,7 +17,9 @@ import com.angelcantero.listme.repository.UsuarioRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,11 +35,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ItemImageService {
-    
+
     private final ItemImageRepository itemImageRepository;
     private final ItemRepository itemRepository;
     private final LibraryService libraryService;
     private final UsuarioRepository usuarioRepository;
+    private final FirebaseStorageService firebaseStorageService;
 
     /**
      * Valida acceso de lectura a la biblioteca.
@@ -87,8 +90,7 @@ public class ItemImageService {
         image.setImageUri(dto.getImageUri());
         image.setItem(item);
 
-        Boolean isFav = dto.getIsFavorite();
-        if (isFav != null && isFav) {
+        if (dto.isFavorite()) {
             setFavoriteImage(dto.getIdItem(), image);
         } else {
             image.setIsFavorite(false);
@@ -117,13 +119,10 @@ public class ItemImageService {
             image.setRemoteImageUrl(dto.getRemoteImageUrl());
         }
 
-        Boolean isFav = dto.getIsFavorite();
-        if (isFav != null) {
-            if (isFav) {
-                setFavoriteImage(image.getItem().getIdItem(), image);
-            } else {
-                image.setIsFavorite(false);
-            }
+        if (dto.isFavorite()) {
+            setFavoriteImage(image.getItem().getIdItem(), image);
+        } else {
+            image.setIsFavorite(false);
         }
 
         return mapToDTO(itemImageRepository.save(image));
@@ -151,6 +150,30 @@ public class ItemImageService {
         validateLibraryWriteAccess(image.getItem().getLibrary().getIdLibrary());
 
         setFavoriteImage(itemId, image);
+
+        return mapToDTO(itemImageRepository.save(image));
+    }
+
+    /**
+     * Sube una imagen a Firebase Storage y crea el registro en BD.
+     *
+     * @param file archivo a subir
+     * @param itemId ID del ítem
+     * @return imagen creada con URL remota
+     * @throws IOException si hay error al subir
+     */
+    @Transactional
+    public ItemImageDTO uploadImage(MultipartFile file, Long itemId) throws IOException {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new ResourceNotFoundException("Item not found"));
+        validateLibraryWriteAccess(item.getLibrary().getIdLibrary());
+
+        String remoteUrl = firebaseStorageService.uploadImage(file, itemId);
+
+        ItemImage image = new ItemImage();
+        image.setRemoteImageUrl(remoteUrl);
+        image.setItem(item);
+        image.setIsFavorite(false);
 
         return mapToDTO(itemImageRepository.save(image));
     }
@@ -195,7 +218,6 @@ public class ItemImageService {
         }
         dto.setImageUri(image.getImageUri());
         dto.setRemoteImageUrl(image.getRemoteImageUrl());
-        dto.setIsFavorite(image.getIsFavorite());
         return dto;
     }
 }
