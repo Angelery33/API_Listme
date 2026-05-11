@@ -101,6 +101,32 @@ public class ItemImageController {
     }
 
     /**
+     * Obtiene una imagen específica de un ítem (con validación de acceso).
+     * Redirige a Firebase Storage para descargar la imagen.
+     *
+     * @param itemId ID del ítem
+     * @param imageId ID de la imagen
+     * @return redirección a la imagen en Firebase Storage
+     */
+    @GetMapping("/{itemId}/{imageId}")
+    public ResponseEntity<?> getImage(@PathVariable Long itemId, @PathVariable Long imageId) {
+        try {
+            log.info("Obteniendo imagen {} del ítem {}", imageId, itemId);
+            String imageUrl = service.getImageUrl(itemId, imageId);
+            if (imageUrl == null || imageUrl.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            // Redirige al cliente a la URL de Firebase Storage
+            return ResponseEntity.status(org.springframework.http.HttpStatus.MOVED_PERMANENTLY)
+                    .header("Location", imageUrl)
+                    .build();
+        } catch (Exception e) {
+            log.error("Error al obtener imagen: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
      * Elimina una imagen.
      *
      * @param id ID de la imagen

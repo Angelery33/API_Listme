@@ -179,6 +179,25 @@ public class ItemImageService {
     }
 
     /**
+     * Obtiene la URL de una imagen específica con validación de acceso.
+     *
+     * @param itemId ID del ítem
+     * @param imageId ID de la imagen
+     * @return URL remota de la imagen
+     */
+    public String getImageUrl(Long itemId, Long imageId) {
+        ItemImage image = itemImageRepository.findById(imageId)
+                .orElseThrow(() -> new ResourceNotFoundException("Image not found"));
+
+        if (image.getItem() == null || !image.getItem().getIdItem().equals(itemId)) {
+            throw new ResourceNotFoundException("Image not found for this item");
+        }
+
+        validateLibraryReadAccess(image.getItem().getLibrary().getIdLibrary());
+        return image.getRemoteImageUrl();
+    }
+
+    /**
      * Elimina una imagen.
      *
      * @param id ID de la imagen
