@@ -179,7 +179,7 @@ public class ItemService {
      * violaciones de la FK self-reference (parentId).
      */
     private void deleteItemRecursively(Long id) {
-        List<Item> children = itemRepository.findByParentId(id);
+        List<Item> children = itemRepository.findByParentItemIdItem(id);
         for (Item child : children) {
             deleteItemRecursively(child.getIdItem());
         }
