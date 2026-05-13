@@ -35,10 +35,12 @@ public class Invitation {
     @Column(nullable = false)
     private boolean readOnly;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private InvitationStatus status = InvitationStatus.PENDING;
 
+    @Builder.Default
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 }
