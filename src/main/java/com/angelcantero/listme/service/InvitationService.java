@@ -53,6 +53,7 @@ public class InvitationService {
         return mapToDTO(invitationRepository.save(invitation));
     }
 
+    @Transactional(readOnly = true)
     public List<InvitationDTO> getPendingInvitations() {
         Usuario currentUser = getCurrentUser();
         return invitationRepository.findByReceiverAndStatus(currentUser, InvitationStatus.PENDING)
