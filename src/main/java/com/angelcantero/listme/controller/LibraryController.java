@@ -71,18 +71,6 @@ public class LibraryController {
         return ResponseEntity.ok(libraryService.updateLibrary(id, libraryDTO));
     }
 
-    /**
-     * Comparte una biblioteca con otro usuario.
-     *
-     * @param id ID de la biblioteca
-     * @param shareRequest datos de compartición
-     * @return sin contenido
-     */
-    @PostMapping("/{id}/share")
-    public ResponseEntity<Void> share(@PathVariable Long id, @Valid @RequestBody com.angelcantero.listme.dto.ShareRequest shareRequest) {
-        libraryService.shareLibrary(id, shareRequest);
-        return ResponseEntity.ok().build();
-    }
 
     /**
      * Elimina una biblioteca.

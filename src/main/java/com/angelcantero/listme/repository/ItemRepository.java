@@ -46,4 +46,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
      */
     @Query("SELECT DISTINCT i FROM Item i LEFT JOIN i.library l LEFT JOIN l.editors e LEFT JOIN l.viewers v WHERE l.usuario = :usuario OR :usuario MEMBER OF l.editors OR :usuario MEMBER OF l.viewers")
     List<Item> findAllAccessibleByUser(@Param("usuario") Usuario usuario);
+
+    long countByLibraryUsuario(Usuario usuario);
 }

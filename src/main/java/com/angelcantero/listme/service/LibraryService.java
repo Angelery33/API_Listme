@@ -153,34 +153,6 @@ public class LibraryService {
         libraryRepository.saveAll(libraries);
     }
 
-    /**
-     * Comparte una biblioteca con otro usuario.
-     *
-     * @param id ID de la biblioteca
-     * @param shareRequest datos de compartición
-     * @throws ResourceNotFoundException si no es propietario o usuario no existe
-     */
-    public void shareLibrary(Long id, com.angelcantero.listme.dto.ShareRequest shareRequest) {
-        Library library = libraryRepository.findOwnedById(id, getCurrentUser())
-                .orElseThrow(() -> new ResourceNotFoundException("Only the owner can share the library"));
-        
-        Usuario currentUser = getCurrentUser();
-        Usuario targetUser = usuarioRepository.findByUsername(shareRequest.getUsername())
-                .orElseThrow(() -> new ResourceNotFoundException("Target user not found: " + shareRequest.getUsername()));
-        
-        if (targetUser.getId().equals(currentUser.getId())) {
-            throw new ResourceNotFoundException("No puedes compartir una biblioteca contigo mismo");
-        }
-        
-        if (shareRequest.isReadOnly()) {
-            library.getViewers().add(targetUser);
-            library.getEditors().remove(targetUser);
-        } else {
-            library.getEditors().add(targetUser);
-            library.getViewers().remove(targetUser);
-        }
-        libraryRepository.save(library);
-    }
 
     /**
      * Valida que el usuario tenga acceso de lectura.

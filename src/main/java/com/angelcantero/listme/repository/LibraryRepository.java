@@ -60,4 +60,6 @@ public interface LibraryRepository extends JpaRepository<Library, Long> {
      */
     @Query("SELECT l FROM Library l WHERE l.idLibrary = :id AND l.usuario = :usuario")
     Optional<Library> findOwnedById(@Param("id") Long id, @Param("usuario") Usuario usuario);
+
+    long countByUsuario(Usuario usuario);
 }

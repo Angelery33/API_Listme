@@ -228,4 +228,10 @@ public class Item {
     @OneToMany(mappedBy = "item", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @ToString.Exclude
     private List<ItemImage> images;
+
+    /**
+     * Versión de la entidad para control de concurrencia optimista.
+     */
+    @Version
+    private Long version;
 }
