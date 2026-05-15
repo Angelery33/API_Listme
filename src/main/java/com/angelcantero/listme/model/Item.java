@@ -230,6 +230,13 @@ public class Item {
     private List<ItemImage> images;
 
     /**
+     * Atributos personalizados asociados al ítem.
+     */
+    @OneToMany(mappedBy = "item", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @ToString.Exclude
+    private List<AttributeItem> attributeItems;
+
+    /**
      * Versión de la entidad para control de concurrencia optimista.
      */
     @Version
