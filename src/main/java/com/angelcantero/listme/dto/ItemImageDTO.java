@@ -1,5 +1,6 @@
 package com.angelcantero.listme.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -40,5 +41,6 @@ public class ItemImageDTO {
     /**
      * Indica si es la imagen favorita.
      */
+    @JsonProperty("isFavorite")
     private boolean isFavorite = false;
 }
