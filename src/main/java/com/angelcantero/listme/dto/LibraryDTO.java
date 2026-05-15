@@ -84,6 +84,11 @@ public class LibraryDTO {
     private int genreLayoutMode;
 
     /**
+     * Orden y visibilidad de las secciones de estado (comma-separated).
+     */
+    private String statusOrder;
+
+    /**
      * Indica si la vista es compacta.
      */
     @JsonProperty("compact")

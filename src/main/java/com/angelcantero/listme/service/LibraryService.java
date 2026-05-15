@@ -222,6 +222,7 @@ public class LibraryService {
         entity.setCustomProgressUnit(dto.getCustomProgressUnit());
         entity.setDefaultCategory(dto.getDefaultCategory());
         entity.setRatingScale(dto.getRatingScale());
+        entity.setStatusOrder(dto.getStatusOrder());
     }
 
     /**
@@ -250,6 +251,7 @@ public class LibraryService {
         dto.setCustomProgressUnit(library.getCustomProgressUnit());
         dto.setDefaultCategory(library.getDefaultCategory());
         dto.setRatingScale(library.getRatingScale());
+        dto.setStatusOrder(library.getStatusOrder());
         return dto;
     }
 }

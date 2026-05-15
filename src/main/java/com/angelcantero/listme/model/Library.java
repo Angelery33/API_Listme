@@ -131,6 +131,12 @@ public class Library {
         private int genreLayoutMode;
 
         /**
+         * Orden y visibilidad de las secciones de estado (comma-separated).
+         * Ejemplo: "PENDING,IN_PROGRESS,COMPLETED"
+         */
+        private String statusOrder;
+
+        /**
          * Indica si la vista es compacta.
          */
         private boolean isCompact;
