@@ -222,6 +222,10 @@ public class ItemImageService {
                 .forEach(img -> img.setIsFavorite(false));
         itemImageRepository.flush();
         image.setIsFavorite(true);
+        // Keep item.remoteImageUrl in sync with the favorite image URL
+        if (image.getItem() != null && image.getRemoteImageUrl() != null) {
+            image.getItem().setRemoteImageUrl(image.getRemoteImageUrl());
+        }
     }
 
     /**
