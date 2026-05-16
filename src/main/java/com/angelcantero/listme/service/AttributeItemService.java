@@ -49,7 +49,7 @@ public class AttributeItemService {
     private Usuario getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return usuarioRepository.findByUsername(auth.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
     }
 
     /**
@@ -78,7 +78,7 @@ public class AttributeItemService {
      */
     public List<AttributeItemDTO> getByItemId(Long itemId) {
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new ResourceNotFoundException("Item not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ítem no encontrado"));
         validateLibraryReadAccess(item.getLibrary().getIdLibrary());
         return attributeItemRepository.findByItemIdItem(itemId)
                 .stream().map(this::mapToDTO).collect(Collectors.toList());
@@ -93,11 +93,11 @@ public class AttributeItemService {
     @Transactional
     public AttributeItemDTO create(AttributeItemDTO dto) {
         Item item = itemRepository.findById(dto.getIdItem())
-                .orElseThrow(() -> new ResourceNotFoundException("Item not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ítem no encontrado"));
         validateLibraryWriteAccess(item.getLibrary().getIdLibrary());
 
         AttributeType type = attributeTypeRepository.findById(dto.getAttributeTypeId())
-                .orElseThrow(() -> new ResourceNotFoundException("Attribute Type not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Tipo de atributo no encontrado"));
 
         AttributeItem attribute = new AttributeItem();
         attribute.setValue(dto.getValue());
@@ -114,7 +114,7 @@ public class AttributeItemService {
     @Transactional
     public void delete(Long id) {
         AttributeItem attribute = attributeItemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Attribute not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Atributo no encontrado"));
         validateLibraryWriteAccess(attribute.getItem().getLibrary().getIdLibrary());
         attributeItemRepository.delete(attribute);
     }

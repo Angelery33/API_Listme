@@ -15,24 +15,48 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Proxy de imágenes externas para evitar restricciones CORS en Flutter Web.
- * Solo permite dominios de confianza para evitar abuso.
+ * Controlador proxy para imágenes externas.
+ *
+ * <p>Actúa como intermediario entre el cliente Flutter Web y los servidores de imágenes
+ * externos, resolviendo las restricciones CORS que impiden cargar imágenes directamente
+ * desde el navegador. Solo se permiten dominios de confianza predefinidos para evitar
+ * un uso abusivo del proxy.</p>
  */
 @RestController
 @RequestMapping("/api/v1/proxy")
 public class ImageProxyController {
 
+    /**
+     * Conjunto de dominios externos autorizados para ser proxificados.
+     * Cualquier URL cuyo host no pertenezca a esta lista será rechazada con HTTP 403.
+     */
     private static final Set<String> ALLOWED_DOMAINS = Set.of(
             "cdn.myanimelist.net",
             "myanimelist.net",
             "img.myanimelist.net"
     );
 
+    /** Tiempo máximo de espera para establecer la conexión con el servidor externo, en milisegundos. */
     private static final int CONNECT_TIMEOUT_MS = 5_000;
+
+    /** Tiempo máximo de espera para leer la respuesta del servidor externo, en milisegundos. */
     private static final int READ_TIMEOUT_MS = 10_000;
+
     /** Límite de 5 MB para imágenes proxificadas. */
     private static final int MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
+    /**
+     * Descarga y retransmite una imagen externa al cliente.
+     *
+     * <p>Valida que la URL utilice un esquema HTTP/HTTPS y que el dominio esté en la lista
+     * de permitidos antes de realizar la descarga. La respuesta incluye cabeceras de caché
+     * de una hora para reducir peticiones repetidas.</p>
+     *
+     * @param url URL absoluta de la imagen externa que se desea proxificar.
+     * @return {@link ResponseEntity} con los bytes de la imagen y el tipo de contenido
+     *         correspondiente, o un código de error si la URL no es válida (403),
+     *         la imagen es demasiado grande (413) o el servidor externo falla (502).
+     */
     @GetMapping("/image")
     public ResponseEntity<byte[]> proxyImage(@RequestParam String url) {
         try {

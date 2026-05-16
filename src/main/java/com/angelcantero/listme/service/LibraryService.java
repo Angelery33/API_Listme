@@ -44,7 +44,7 @@ public class LibraryService {
     private Usuario getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return usuarioRepository.findByUsername(auth.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
     }
 
     /**
@@ -79,7 +79,7 @@ public class LibraryService {
     public LibraryDTO getLibraryById(Long id) {
         Usuario currentUser = getCurrentUser();
         Library library = libraryRepository.findAccessibleById(id, currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("Library not found or you don't have access"));
+                .orElseThrow(() -> new ResourceNotFoundException("Biblioteca no encontrada o acceso denegado"));
         return mapToDTOWithFlags(library, currentUser);
     }
 
@@ -110,7 +110,7 @@ public class LibraryService {
     public LibraryDTO updateLibrary(Long id, LibraryDTO updateDTO) {
         Usuario currentUser = getCurrentUser();
         Library library = libraryRepository.findOwnedById(id, currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("Only the owner can update the library properties"));
+                .orElseThrow(() -> new ResourceNotFoundException("Solo el propietario puede actualizar las propiedades de la biblioteca"));
 
         if (updateDTO != null) {
             populateEntityFromDTO(library, updateDTO);
@@ -127,7 +127,7 @@ public class LibraryService {
     @Transactional
     public void deleteLibrary(Long id) {
         Library library = libraryRepository.findOwnedById(id, getCurrentUser())
-                .orElseThrow(() -> new ResourceNotFoundException("Only the owner can delete the library"));
+                .orElseThrow(() -> new ResourceNotFoundException("Solo el propietario puede eliminar la biblioteca"));
         libraryRepository.delete(library);
     }
 
@@ -165,7 +165,7 @@ public class LibraryService {
     public void validateLibraryReadAccess(Long libraryId) {
         if (libraryId == null) return;
         libraryRepository.findAccessibleById(libraryId, getCurrentUser())
-                .orElseThrow(() -> new ResourceNotFoundException("Library not found or you don't have access"));
+                .orElseThrow(() -> new ResourceNotFoundException("Biblioteca no encontrada o acceso denegado"));
     }
 
     /**
@@ -177,7 +177,7 @@ public class LibraryService {
     public void validateLibraryWriteAccess(Long libraryId) {
         if (libraryId == null) return;
         libraryRepository.findEditableById(libraryId, getCurrentUser())
-                .orElseThrow(() -> new ResourceNotFoundException("Library not found or you don't have permission to edit"));
+                .orElseThrow(() -> new ResourceNotFoundException("Biblioteca no encontrada o sin permiso de edición"));
     }
 
     /**
@@ -239,7 +239,7 @@ public class LibraryService {
     public List<CollaboratorDTO> getCollaborators(Long libraryId) {
         Usuario currentUser = getCurrentUser();
         Library library = libraryRepository.findAccessibleById(libraryId, currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("Library not found or no access"));
+                .orElseThrow(() -> new ResourceNotFoundException("Biblioteca no encontrada o acceso denegado"));
 
         List<CollaboratorDTO> result = new ArrayList<>();
         library.getEditors().forEach(u ->
@@ -262,7 +262,7 @@ public class LibraryService {
     public void removeCollaborator(Long libraryId, Long userId) {
         Usuario currentUser = getCurrentUser();
         Library library = libraryRepository.findOwnedById(libraryId, currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("Only the owner can remove collaborators"));
+                .orElseThrow(() -> new ResourceNotFoundException("Solo el propietario puede eliminar colaboradores"));
 
         library.getEditors().removeIf(u -> u.getId().equals(userId));
         library.getViewers().removeIf(u -> u.getId().equals(userId));
@@ -282,10 +282,10 @@ public class LibraryService {
     public void leaveLibrary(Long libraryId) {
         Usuario currentUser = getCurrentUser();
         Library library = libraryRepository.findAccessibleById(libraryId, currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("Library not found or no access"));
+                .orElseThrow(() -> new ResourceNotFoundException("Biblioteca no encontrada o acceso denegado"));
 
         if (library.getUsuario().getId().equals(currentUser.getId())) {
-            throw new IllegalArgumentException("The owner cannot leave their own library");
+            throw new IllegalArgumentException("El propietario no puede abandonar su propia biblioteca");
         }
 
         library.getEditors().removeIf(u -> u.getId().equals(currentUser.getId()));

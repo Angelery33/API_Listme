@@ -13,9 +13,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <p><strong>GlobalExceptionHandler</strong></p>
- * <p>Controlador de excepciones global para la API.</p>
- * Created on: 2026-03-20
+ * Manejador global de excepciones para la API REST.
+ *
+ * <p>Centraliza el tratamiento de errores de toda la aplicación mediante
+ * {@code @RestControllerAdvice}, traduciendo las excepciones más comunes en
+ * respuestas HTTP con el código de estado y el mensaje adecuados, usando
+ * {@link com.angelcantero.listme.dto.ErrorResponseDTO} como cuerpo de respuesta.</p>
  *
  * @author Angel Cantero
  * @version 1.0.0
@@ -23,6 +26,16 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * Maneja los errores de validación de argumentos de entrada.
+     *
+     * <p>Se activa cuando un parámetro anotado con {@code @Valid} no supera
+     * las restricciones declaradas (Bean Validation). Devuelve un mapa con
+     * el nombre de cada campo inválido y el mensaje de error correspondiente.</p>
+     *
+     * @param ex excepción lanzada por Spring al detectar errores de validación.
+     * @return {@link ResponseEntity} con estado HTTP 400 y el detalle de los campos fallidos.
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDTO> handleValidationErrors(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
@@ -39,6 +52,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(response);
     }
 
+    /**
+     * Maneja violaciones de integridad de datos en la base de datos.
+     *
+     * <p>Se activa ante duplicados en campos únicos, referencias nulas a columnas
+     * obligatorias u otras restricciones a nivel de base de datos.</p>
+     *
+     * @param ex excepción lanzada por Spring Data al detectar una violación de integridad.
+     * @return {@link ResponseEntity} con estado HTTP 409 y un mensaje descriptivo del conflicto.
+     */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponseDTO> handleDataIntegrity(DataIntegrityViolationException ex) {
         String cause = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage();
@@ -52,6 +74,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 
+    /**
+     * Maneja el caso en que un recurso solicitado no existe en el sistema.
+     *
+     * @param ex excepción lanzada por los servicios cuando no se encuentra la entidad buscada.
+     * @return {@link ResponseEntity} con estado HTTP 404 y el mensaje de la excepción.
+     */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponseDTO> handleResourceNotFound(ResourceNotFoundException ex) {
         ErrorResponseDTO response = new ErrorResponseDTO(
@@ -63,6 +91,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Maneja el intento de autenticación con credenciales incorrectas.
+     *
+     * @param ex excepción lanzada por Spring Security cuando el usuario o la contraseña no coinciden.
+     * @return {@link ResponseEntity} con estado HTTP 401 y un mensaje informativo.
+     */
     @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
     public ResponseEntity<ErrorResponseDTO> handleBadCredentials(org.springframework.security.authentication.BadCredentialsException ex) {
         ErrorResponseDTO response = new ErrorResponseDTO(
@@ -74,6 +108,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
+    /**
+     * Manejador de último recurso para excepciones de tiempo de ejecución no contempladas.
+     *
+     * <p>Captura cualquier {@link RuntimeException} que no haya sido gestionada por
+     * un manejador más específico, evitando que el stack trace llegue al cliente.</p>
+     *
+     * @param ex excepción de tiempo de ejecución no controlada.
+     * @return {@link ResponseEntity} con estado HTTP 500 y el mensaje de la excepción.
+     */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponseDTO> handleRuntime(RuntimeException ex) {
         ErrorResponseDTO response = new ErrorResponseDTO(

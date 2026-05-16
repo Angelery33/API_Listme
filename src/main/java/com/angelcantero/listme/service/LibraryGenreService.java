@@ -45,7 +45,7 @@ public class LibraryGenreService {
     private Usuario getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return usuarioRepository.findByUsername(auth.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
     }
 
     /**
@@ -88,7 +88,7 @@ public class LibraryGenreService {
     public LibraryGenreDTO createGenre(LibraryGenreDTO dto) {
         validateLibraryWriteAccess(dto.getLibraryId());
         Library library = libraryRepository.findById(dto.getLibraryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Library not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Biblioteca no encontrada"));
         LibraryGenre genre = new LibraryGenre();
         genre.setName(dto.getName());
         genre.setLibrary(library);
@@ -103,7 +103,7 @@ public class LibraryGenreService {
     @Transactional
     public void deleteGenre(Long id) {
         LibraryGenre genre = libraryGenreRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Genre not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Género no encontrado"));
         validateLibraryWriteAccess(genre.getLibrary().getIdLibrary());
         libraryGenreRepository.delete(genre);
     }

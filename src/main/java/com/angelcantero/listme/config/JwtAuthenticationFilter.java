@@ -77,7 +77,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             response.setHeader("X-Token-Expired", "true");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
-            response.getWriter().write("{\"error\":\"Token expired. Please refresh your token.\"}");
+            response.getWriter().write("{\"error\":\"Token expirado. Por favor, renueva tu token.\"}");
             return;
         } catch (Exception e) {
             log.warn("Error al procesar token JWT: {}", e.getMessage());

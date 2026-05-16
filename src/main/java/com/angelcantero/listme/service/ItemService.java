@@ -45,7 +45,7 @@ public class ItemService {
     private Usuario getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return usuarioRepository.findByUsername(auth.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
     }
 
     /**
@@ -96,8 +96,8 @@ public class ItemService {
      */
     public ItemDTO getItemById(Long id) {
         Item item = itemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Item not found with id: " + id));
-        
+                .orElseThrow(() -> new ResourceNotFoundException("Ítem no encontrado con id: " + id));
+
         if (item.getLibrary() == null) {
             throw new ResourceNotFoundException("El ítem no tiene una biblioteca asociada");
         }
@@ -117,12 +117,12 @@ public class ItemService {
     public ItemDTO createItem(ItemDTO createDTO) {
         validateLibraryWriteAccess(createDTO.getIdLibrary());
         Library library = libraryRepository.findById(createDTO.getIdLibrary())
-                .orElseThrow(() -> new ResourceNotFoundException("Library not found with id: " + createDTO.getIdLibrary()));
+                .orElseThrow(() -> new ResourceNotFoundException("Biblioteca no encontrada con id: " + createDTO.getIdLibrary()));
 
         Item parentItem = null;
         if (createDTO.getParentId() != null) {
             parentItem = itemRepository.findById(createDTO.getParentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Parent Item not found with id: " + createDTO.getParentId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Ítem padre no encontrado con id: " + createDTO.getParentId()));
             validateLibraryReadAccess(parentItem.getLibrary().getIdLibrary());
         }
 
@@ -142,17 +142,17 @@ public class ItemService {
     @Transactional
     public ItemDTO updateItem(Long id, ItemDTO updateDTO) {
         Item item = itemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Item not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Ítem no encontrado con id: " + id));
         validateLibraryWriteAccess(item.getLibrary().getIdLibrary());
 
         Library library = libraryRepository.findById(updateDTO.getIdLibrary())
-                .orElseThrow(() -> new ResourceNotFoundException("Library not found with id: " + updateDTO.getIdLibrary()));
+                .orElseThrow(() -> new ResourceNotFoundException("Biblioteca no encontrada con id: " + updateDTO.getIdLibrary()));
         validateLibraryWriteAccess(library.getIdLibrary());
 
         Item parentItem = null;
         if (updateDTO.getParentId() != null) {
             parentItem = itemRepository.findById(updateDTO.getParentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Parent Item not found with id: " + updateDTO.getParentId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Ítem padre no encontrado con id: " + updateDTO.getParentId()));
             validateLibraryReadAccess(parentItem.getLibrary().getIdLibrary());
         }
 
@@ -169,7 +169,7 @@ public class ItemService {
     @Transactional
     public void deleteItem(Long id) {
         Item item = itemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Item not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Ítem no encontrado con id: " + id));
         validateLibraryWriteAccess(item.getLibrary().getIdLibrary());
         deleteItemRecursively(id);
     }

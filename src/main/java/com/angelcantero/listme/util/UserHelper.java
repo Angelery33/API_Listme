@@ -8,6 +8,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+/**
+ * <p><strong>UserHelper</strong></p>
+ * <p>Utilidad para obtener información del usuario autenticado en el contexto de seguridad.</p>
+ * <p>Centraliza el acceso al usuario actual para evitar duplicar lógica en los servicios.</p>
+ *
+ * @author Angel Cantero
+ * @since 1.0.0
+ */
 @Component
 @RequiredArgsConstructor
 public class UserHelper {
