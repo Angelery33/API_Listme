@@ -4,15 +4,8 @@ services:
     container_name: listme
     ports:
       - "8089:8089"
-    environment:
-      - LISTME_DB_URL=jdbc:postgresql://postgres:5432/list_me
-      - LISTME_DB_USERNAME=admin
-      - LISTME_DB_PASSWORD=angelc45
-      - LISTME_JPA_DDL_AUTO=update
-      - LISTME_JWT_SECRET=A7F3C9D2B8E1054F6A3D7C2B9E4F1A6D3C8B2E5F9A0D4C7B1E8F3A6D9C2B5E0F1
-      - LISTME_BOOTSTRAP_USERNAME=angel
-      - LISTME_BOOTSTRAP_PASSWORD=Listme@2026!
-      - LISTME_CORS_ORIGINS=https://app.angelcantero.store,https://angelcantero.github.io,http://localhost:3000,http://localhost:8080
+    env_file:
+      - .env
     depends_on:
       - postgres
     restart: unless-stopped
