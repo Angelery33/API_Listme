@@ -207,7 +207,10 @@ public class AuthController {
         usuario.setPassword(passwordEncoder.encode(request.getNewPassword()));
         usuarioRepository.save(usuario);
 
-        return ResponseEntity.ok("Contraseña actualizada correctamente");
+        // Invalidar todos los refresh tokens activos para forzar re-login en todos los dispositivos
+        refreshTokenService.deleteByUserId(usuario.getId());
+
+        return ResponseEntity.ok("Contraseña actualizada correctamente. Por seguridad, inicia sesión de nuevo.");
     }
 
     /**

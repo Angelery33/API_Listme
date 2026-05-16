@@ -28,8 +28,8 @@ public class BootstrapUserConfig {
     CommandLineRunner bootstrapAdminUser(
             UsuarioRepository usuarioRepository,
             PasswordEncoder passwordEncoder,
-            @Value("angel") String username,
-            @Value("1234") String password
+            @Value("${listme.bootstrap.username:}") String username,
+            @Value("${listme.bootstrap.password:}") String password
     ) {
         return args -> {
             if (username == null || username.isBlank() || password == null || password.isBlank()) {

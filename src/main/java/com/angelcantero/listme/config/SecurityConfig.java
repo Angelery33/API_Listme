@@ -23,7 +23,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * <p><strong>SecurityConfig</strong></p>
@@ -43,6 +45,14 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final CustomAccessDeniedHandler accessDeniedHandler;
+
+    /**
+     * Orígenes CORS permitidos. Configurable vía variable de entorno {@code LISTME_CORS_ORIGINS}
+     * (valores separados por coma). Por defecto solo se permite el dominio de producción exacto.
+     * Nunca usar wildcards en producción.
+     */
+    @Value("${listme.cors.allowed-origins:https://app.angelcantero.store,http://localhost:3000,http://localhost:8080,http://127.0.0.1:3000}")
+    private String allowedOriginsRaw;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -95,12 +105,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Restricción de orígenes: cambiar según ambiente
-        configuration.setAllowedOriginPatterns(List.of(
-            "http://localhost:*",
-            "http://127.0.0.1:*",
-            "https://*.angelcantero.store"
-        ));
+        // Orígenes exactos leídos de variable de entorno LISTME_CORS_ORIGINS.
+        // En desarrollo se admiten localhost; en producción solo el dominio publicado.
+        // CSRF está deshabilitado porque la API usa JWT en headers, no cookies.
+        List<String> origins = Arrays.asList(allowedOriginsRaw.split(","));
+        configuration.setAllowedOrigins(origins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setExposedHeaders(List.of("Authorization", "X-Token-Expired"));
