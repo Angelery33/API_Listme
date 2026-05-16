@@ -4,6 +4,7 @@ import com.angelcantero.listme.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import com.angelcantero.listme.dto.CollaboratorDTO;
 import com.angelcantero.listme.dto.LibraryDTO;
 import com.angelcantero.listme.model.Library;
 import com.angelcantero.listme.model.Usuario;
@@ -13,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -223,6 +225,72 @@ public class LibraryService {
         entity.setDefaultCategory(dto.getDefaultCategory());
         entity.setRatingScale(dto.getRatingScale());
         entity.setStatusOrder(dto.getStatusOrder());
+    }
+
+    /**
+     * Devuelve la lista de colaboradores (editores y viewers) de una biblioteca.
+     *
+     * <p>Solo accesible por usuarios con acceso a la biblioteca.</p>
+     *
+     * @param libraryId ID de la biblioteca
+     * @return lista de {@link CollaboratorDTO} con userId, username y role
+     */
+    @Transactional(readOnly = true)
+    public List<CollaboratorDTO> getCollaborators(Long libraryId) {
+        Usuario currentUser = getCurrentUser();
+        Library library = libraryRepository.findAccessibleById(libraryId, currentUser)
+                .orElseThrow(() -> new ResourceNotFoundException("Library not found or no access"));
+
+        List<CollaboratorDTO> result = new ArrayList<>();
+        library.getEditors().forEach(u ->
+                result.add(new CollaboratorDTO(u.getId(), u.getUsername(), "editor")));
+        library.getViewers().forEach(u ->
+                result.add(new CollaboratorDTO(u.getId(), u.getUsername(), "viewer")));
+        return result;
+    }
+
+    /**
+     * Elimina a un colaborador de una biblioteca.
+     *
+     * <p>Solo el propietario puede ejecutar esta operación.</p>
+     *
+     * @param libraryId ID de la biblioteca
+     * @param userId    ID del usuario a eliminar
+     * @throws ResourceNotFoundException si la biblioteca no existe o el usuario no es propietario
+     */
+    @Transactional
+    public void removeCollaborator(Long libraryId, Long userId) {
+        Usuario currentUser = getCurrentUser();
+        Library library = libraryRepository.findOwnedById(libraryId, currentUser)
+                .orElseThrow(() -> new ResourceNotFoundException("Only the owner can remove collaborators"));
+
+        library.getEditors().removeIf(u -> u.getId().equals(userId));
+        library.getViewers().removeIf(u -> u.getId().equals(userId));
+        libraryRepository.save(library);
+    }
+
+    /**
+     * Permite al usuario actual abandonar una biblioteca compartida.
+     *
+     * <p>El propietario no puede abandonar su propia biblioteca.</p>
+     *
+     * @param libraryId ID de la biblioteca
+     * @throws ResourceNotFoundException si la biblioteca no existe o no tiene acceso
+     * @throws IllegalArgumentException  si el usuario es el propietario
+     */
+    @Transactional
+    public void leaveLibrary(Long libraryId) {
+        Usuario currentUser = getCurrentUser();
+        Library library = libraryRepository.findAccessibleById(libraryId, currentUser)
+                .orElseThrow(() -> new ResourceNotFoundException("Library not found or no access"));
+
+        if (library.getUsuario().getId().equals(currentUser.getId())) {
+            throw new IllegalArgumentException("The owner cannot leave their own library");
+        }
+
+        library.getEditors().removeIf(u -> u.getId().equals(currentUser.getId()));
+        library.getViewers().removeIf(u -> u.getId().equals(currentUser.getId()));
+        libraryRepository.save(library);
     }
 
     /**

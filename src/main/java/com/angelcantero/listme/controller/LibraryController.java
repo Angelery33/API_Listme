@@ -1,6 +1,7 @@
 package com.angelcantero.listme.controller;
 
 import com.angelcantero.listme.config.Config;
+import com.angelcantero.listme.dto.CollaboratorDTO;
 import com.angelcantero.listme.dto.LibraryDTO;
 import com.angelcantero.listme.service.LibraryService;
 import jakarta.validation.Valid;
@@ -93,6 +94,44 @@ public class LibraryController {
     @PutMapping("/reorder")
     public ResponseEntity<Void> reorder(@Valid @RequestBody List<LibraryReorderItemDTO> items) {
         libraryService.reorderLibraries(items);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Devuelve los colaboradores de una biblioteca.
+     *
+     * @param id ID de la biblioteca
+     * @return lista de colaboradores con su rol
+     */
+    @GetMapping("/{id}/collaborators")
+    public ResponseEntity<List<CollaboratorDTO>> getCollaborators(@PathVariable Long id) {
+        return ResponseEntity.ok(libraryService.getCollaborators(id));
+    }
+
+    /**
+     * Elimina a un colaborador de una biblioteca (solo propietario).
+     *
+     * @param id     ID de la biblioteca
+     * @param userId ID del usuario a eliminar
+     * @return sin contenido
+     */
+    @DeleteMapping("/{id}/collaborators/{userId}")
+    public ResponseEntity<Void> removeCollaborator(
+            @PathVariable Long id,
+            @PathVariable Long userId) {
+        libraryService.removeCollaborator(id, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Permite al usuario actual abandonar una biblioteca compartida.
+     *
+     * @param id ID de la biblioteca
+     * @return sin contenido
+     */
+    @DeleteMapping("/{id}/leave")
+    public ResponseEntity<Void> leaveLibrary(@PathVariable Long id) {
+        libraryService.leaveLibrary(id);
         return ResponseEntity.noContent().build();
     }
 }
