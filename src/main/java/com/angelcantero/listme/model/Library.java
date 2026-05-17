@@ -76,6 +76,14 @@ public class Library {
         private java.util.List<LibraryGenre> genres = new java.util.ArrayList<>();
 
         /**
+         * Invitaciones asociadas a esta biblioteca.
+         * Se eliminan en cascada al borrar la biblioteca.
+         */
+        @OneToMany(mappedBy = "library", cascade = CascadeType.ALL, orphanRemoval = true)
+        @ToString.Exclude
+        private java.util.List<Invitation> invitations = new java.util.ArrayList<>();
+
+        /**
          * Nombre de la biblioteca.
          * Campo obligatorio.
          */
