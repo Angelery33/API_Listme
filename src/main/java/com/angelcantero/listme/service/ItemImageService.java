@@ -11,11 +11,6 @@ import com.angelcantero.listme.model.ItemImage;
 import com.angelcantero.listme.repository.ItemImageRepository;
 import com.angelcantero.listme.repository.ItemRepository;
 
-import com.angelcantero.listme.model.Usuario;
-import com.angelcantero.listme.repository.LibraryRepository;
-import com.angelcantero.listme.repository.UsuarioRepository;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,7 +34,6 @@ public class ItemImageService {
     private final ItemImageRepository itemImageRepository;
     private final ItemRepository itemRepository;
     private final LibraryService libraryService;
-    private final UsuarioRepository usuarioRepository;
     private final FirebaseStorageService firebaseStorageService;
 
     /**

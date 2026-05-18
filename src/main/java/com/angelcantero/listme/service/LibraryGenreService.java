@@ -10,10 +10,6 @@ import com.angelcantero.listme.model.LibraryGenre;
 import com.angelcantero.listme.repository.LibraryGenreRepository;
 import com.angelcantero.listme.repository.LibraryRepository;
 
-import com.angelcantero.listme.model.Usuario;
-import com.angelcantero.listme.repository.UsuarioRepository;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -35,18 +31,7 @@ public class LibraryGenreService {
     private final LibraryGenreRepository libraryGenreRepository;
     private final LibraryRepository libraryRepository;
     private final LibraryService libraryService;
-    private final UsuarioRepository usuarioRepository;
 
-    /**
-     * Obtiene el usuario actual.
-     *
-     * @return el usuario
-     */
-    private Usuario getCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return usuarioRepository.findByUsername(auth.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
-    }
 
     /**
      * Valida acceso de lectura.

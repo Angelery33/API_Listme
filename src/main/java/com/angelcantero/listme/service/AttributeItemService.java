@@ -12,11 +12,6 @@ import com.angelcantero.listme.repository.AttributeItemRepository;
 import com.angelcantero.listme.repository.AttributeTypeRepository;
 import com.angelcantero.listme.repository.ItemRepository;
 
-import com.angelcantero.listme.model.Usuario;
-import com.angelcantero.listme.repository.LibraryRepository;
-import com.angelcantero.listme.repository.UsuarioRepository;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -39,18 +34,6 @@ public class AttributeItemService {
     private final AttributeTypeRepository attributeTypeRepository;
     private final ItemRepository itemRepository;
     private final LibraryService libraryService;
-    private final UsuarioRepository usuarioRepository;
-
-    /**
-     * Obtiene el usuario actualmente autenticado.
-     *
-     * @return el usuario actual
-     */
-    private Usuario getCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return usuarioRepository.findByUsername(auth.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
-    }
 
     /**
      * Valida acceso de lectura.
