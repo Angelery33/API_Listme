@@ -58,12 +58,8 @@ public class SecurityConfig {
      */
     @Value("${listme.cors.allowed-origins:" +
             "https://app.angelcantero.store," +
-            "http://localhost:3000,http://127.0.0.1:3000," +
-            "http://localhost:5000,http://127.0.0.1:5000," +
-            "http://localhost:5001,http://127.0.0.1:5001," +
-            "http://localhost:7357,http://127.0.0.1:7357," +
-            "http://localhost:8080,http://127.0.0.1:8080," +
-            "http://localhost:8081,http://127.0.0.1:8081}")
+            "http://localhost:*," +
+            "http://127.0.0.1:*}")
     private String allowedOriginsRaw;
 
     @Bean
@@ -121,7 +117,10 @@ public class SecurityConfig {
         // En desarrollo se admiten localhost; en producción solo el dominio publicado.
         // CSRF está deshabilitado porque la API usa JWT en headers, no cookies.
         List<String> origins = Arrays.asList(allowedOriginsRaw.split(","));
-        configuration.setAllowedOrigins(origins);
+        // setAllowedOriginPatterns permite wildcards (e.g. http://localhost:*)
+        // necesario para el puerto aleatorio que asigna Flutter web en debug.
+        // En producción la variable de entorno solo contendrá el dominio exacto.
+        configuration.setAllowedOriginPatterns(origins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setExposedHeaders(List.of("Authorization", "X-Token-Expired"));
