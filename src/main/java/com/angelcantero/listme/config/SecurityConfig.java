@@ -51,7 +51,19 @@ public class SecurityConfig {
      * (valores separados por coma). Por defecto solo se permite el dominio de producción exacto.
      * Nunca usar wildcards en producción.
      */
-    @Value("${listme.cors.allowed-origins:https://app.angelcantero.store,http://localhost:3000,http://localhost:8080,http://127.0.0.1:3000}")
+    /**
+     * Orígenes CORS permitidos. Configurable vía variable de entorno {@code LISTME_CORS_ORIGINS}
+     * (valores separados por coma). En desarrollo se incluyen los puertos habituales de Flutter Web
+     * (5000, 5001, 7357, 8080, 8081, 3000). En producción se sobreescribe con solo el dominio publicado.
+     */
+    @Value("${listme.cors.allowed-origins:" +
+            "https://app.angelcantero.store," +
+            "http://localhost:3000,http://127.0.0.1:3000," +
+            "http://localhost:5000,http://127.0.0.1:5000," +
+            "http://localhost:5001,http://127.0.0.1:5001," +
+            "http://localhost:7357,http://127.0.0.1:7357," +
+            "http://localhost:8080,http://127.0.0.1:8080," +
+            "http://localhost:8081,http://127.0.0.1:8081}")
     private String allowedOriginsRaw;
 
     @Bean
