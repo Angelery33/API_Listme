@@ -149,6 +149,7 @@ public class AuthController {
         response.put("username", usuario.getUsername());
         response.put("email", usuario.getEmail());
         response.put("rol", usuario.getRol());
+        response.put("photoUrl", usuario.getPhotoUrl());
 
         return ResponseEntity.ok(response);
     }
@@ -183,6 +184,40 @@ public class AuthController {
         response.put("id", usuario.getId());
         response.put("username", usuario.getUsername());
         response.put("email", usuario.getEmail());
+        response.put("photoUrl", usuario.getPhotoUrl());
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Actualiza la URL de la foto de perfil del usuario autenticado.
+     *
+     * <p>El cliente sube la imagen directamente a Firebase Storage y envía la URL
+     * de descarga resultante a este endpoint para persistirla en la base de datos.</p>
+     *
+     * @param body mapa con la clave {@code photoUrl} que contiene la URL de Firebase Storage.
+     * @return usuario actualizado con la nueva {@code photoUrl}.
+     */
+    @PutMapping("/profile/photo")
+    public ResponseEntity<?> updateProfilePhoto(@RequestBody Map<String, String> body) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
+        String photoUrl = body.get("photoUrl");
+        if (photoUrl == null || photoUrl.isBlank()) {
+            return ResponseEntity.badRequest().body("La URL de la foto no puede estar vacía");
+        }
+
+        usuario.setPhotoUrl(photoUrl);
+        usuarioRepository.save(usuario);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", usuario.getId());
+        response.put("username", usuario.getUsername());
+        response.put("email", usuario.getEmail());
+        response.put("photoUrl", usuario.getPhotoUrl());
 
         return ResponseEntity.ok(response);
     }

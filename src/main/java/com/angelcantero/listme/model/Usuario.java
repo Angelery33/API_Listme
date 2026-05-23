@@ -56,4 +56,11 @@ public class Usuario {
     @Enumerated(EnumType.STRING)
     @Column(name = "rol", nullable = false)
     private Roles rol;
+
+    /**
+     * URL de la foto de perfil del usuario almacenada en Firebase Storage.
+     * Es {@code null} mientras el usuario no haya subido ninguna imagen.
+     */
+    @Column(name = "photo_url", length = 1024)
+    private String photoUrl;
 }
