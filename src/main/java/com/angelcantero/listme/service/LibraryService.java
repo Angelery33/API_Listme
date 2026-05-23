@@ -64,6 +64,9 @@ public class LibraryService {
                     dto.setShared(isEditor || isViewer);
                     dto.setCanEdit(isOwner || isEditor);
                     dto.setItemCount((long) library.getItems().size());
+                    if (!isOwner) {
+                        dto.setOwnerUsername(library.getUsuario().getUsername());
+                    }
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -197,6 +200,9 @@ public class LibraryService {
         dto.setShared(isEditor || isViewer);
         dto.setCanEdit(isOwner || isEditor);
         dto.setItemCount((long) library.getItems().size());
+        if (!isOwner) {
+            dto.setOwnerUsername(library.getUsuario().getUsername());
+        }
         return dto;
     }
 

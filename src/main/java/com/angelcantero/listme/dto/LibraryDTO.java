@@ -146,4 +146,10 @@ public class LibraryDTO {
      * Cantidad de ítems en la biblioteca.
      */
     private Long itemCount;
+
+    /**
+     * Nombre de usuario del propietario. Solo se incluye cuando el usuario
+     * autenticado no es el propietario (lista compartida recibida).
+     */
+    private String ownerUsername;
 }
