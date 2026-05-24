@@ -211,13 +211,13 @@ public class AuthController {
         }
 
         usuario.setPhotoUrl(photoUrl);
-        usuarioRepository.save(usuario);
+        Usuario saved = usuarioRepository.saveAndFlush(usuario);
 
         Map<String, Object> response = new HashMap<>();
-        response.put("id", usuario.getId());
-        response.put("username", usuario.getUsername());
-        response.put("email", usuario.getEmail());
-        response.put("photoUrl", usuario.getPhotoUrl());
+        response.put("id", saved.getId());
+        response.put("username", saved.getUsername());
+        response.put("email", saved.getEmail());
+        response.put("photoUrl", saved.getPhotoUrl());
 
         return ResponseEntity.ok(response);
     }
