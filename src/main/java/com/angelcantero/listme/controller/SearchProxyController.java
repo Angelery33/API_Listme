@@ -10,9 +10,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 /**
@@ -65,7 +67,7 @@ public class SearchProxyController {
 
         final String endpoint = type.equals("tv") ? "search/tv" : "search/movie";
         final String url = "https://api.themoviedb.org/3/" + endpoint
-                + "?query=" + URI.create(query).toASCIIString()
+                + "?query=" + URLEncoder.encode(query, StandardCharsets.UTF_8)
                 + "&page=" + page
                 + "&language=" + language
                 + "&api_key=" + tmdbKey;
@@ -121,7 +123,7 @@ public class SearchProxyController {
         }
 
         final String url = "https://www.googleapis.com/books/v1/volumes"
-                + "?q=" + URI.create(query).toASCIIString()
+                + "?q=" + URLEncoder.encode(query, StandardCharsets.UTF_8)
                 + "&startIndex=" + startIndex
                 + "&maxResults=" + maxResults
                 + "&printType=" + printType
