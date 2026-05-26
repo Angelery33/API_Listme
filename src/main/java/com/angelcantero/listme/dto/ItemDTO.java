@@ -43,7 +43,7 @@ public class ItemDTO {
     /**
      * Descripción del ítem.
      */
-    @Size(max = 2000, message = "La descripción no puede exceder 2000 caracteres")
+    @Size(max = 5000, message = "La descripción no puede exceder 5000 caracteres")
     private String description;
 
     /**

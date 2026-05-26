@@ -49,9 +49,9 @@ public class Item {
 
     /**
      * Descripción detallada del ítem.
-     * Puede contener información adicional hasta 2000 caracteres.
+     * Puede contener información adicional hasta 5000 caracteres.
      */
-    @Column(length = 2000)
+    @Column(length = 5000)
     private String description;
 
     /**
