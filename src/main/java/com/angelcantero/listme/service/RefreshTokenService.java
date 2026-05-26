@@ -1,5 +1,6 @@
 package com.angelcantero.listme.service;
 
+import com.angelcantero.listme.exception.InvalidRefreshTokenException;
 import com.angelcantero.listme.exception.ResourceNotFoundException;
 import com.angelcantero.listme.model.RefreshToken;
 import com.angelcantero.listme.model.Usuario;
@@ -82,10 +83,11 @@ public class RefreshTokenService {
      * @return el token si es válido
      * @throws RuntimeException si el token ha expirado
      */
+    @Transactional
     public RefreshToken verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
             refreshTokenRepository.delete(token);
-            throw new RuntimeException("El token de refresco ha expirado. Por favor, inicie sesión nuevamente");
+            throw new InvalidRefreshTokenException("El token de refresco ha expirado. Por favor, inicie sesión nuevamente");
         }
         return token;
     }

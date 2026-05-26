@@ -33,12 +33,12 @@ public class BootstrapUserConfig {
     ) {
         return args -> {
             if (username == null || username.isBlank() || password == null || password.isBlank()) {
-                // No bootstrap credentials provided; do nothing.
+                // No se proporcionaron credenciales de bootstrap; no se hace nada.
                 return;
             }
 
             if (usuarioRepository.findByUsername(username).isPresent()) {
-                log.info("Bootstrap user '{}' already exists; skipping creation.", username);
+                log.info("El usuario bootstrap '{}' ya existe; se omite la creación.", username);
                 return;
             }
 
@@ -49,7 +49,7 @@ public class BootstrapUserConfig {
             usuario.setRol(Roles.ADMIN);
 
             usuarioRepository.save(usuario);
-            log.info("Bootstrap ADMIN user '{}' created.", username);
+            log.info("Usuario ADMIN de bootstrap '{}' creado.", username);
         };
     }
 }

@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 import com.angelcantero.listme.dto.LibraryReorderItemDTO;
 
@@ -35,6 +36,7 @@ public class LibraryService {
 
     private final LibraryRepository libraryRepository;
     private final UsuarioRepository usuarioRepository;
+    private final com.angelcantero.listme.repository.ItemRepository itemRepository;
 
     /**
      * Obtiene el usuario actualmente autenticado.
@@ -50,11 +52,23 @@ public class LibraryService {
     /**
      * Obtiene todas las bibliotecas accesibles por el usuario.
      *
-     * @return lista de bibliotecas
+     * <p>Usa una sola query para cargar bibliotecas con editores y visualizadores mediante
+     * JOIN FETCH, y una segunda query de COUNT agrupado para los ítems raíz de todas
+     * las bibliotecas a la vez, evitando el problema N+1.</p>
+     *
+     * @return lista de bibliotecas con sus flags de acceso y conteo de ítems raíz
      */
     public List<LibraryDTO> getAllLibraries() {
         Usuario currentUser = getCurrentUser();
-        return libraryRepository.findAllAccessibleByUser(currentUser).stream()
+        List<com.angelcantero.listme.model.Library> libraries =
+                libraryRepository.findAllAccessibleByUser(currentUser);
+
+        // Conteo de ítems raíz en una sola query agrupada (evita N+1)
+        Map<Long, Long> itemCounts = new HashMap<>();
+        itemRepository.countRootItemsByLibraries(libraries)
+                .forEach(row -> itemCounts.put((Long) row[0], (Long) row[1]));
+
+        return libraries.stream()
                 .map(library -> {
                     LibraryDTO dto = mapToDTO(library);
                     boolean isOwner = library.getUsuario().getId().equals(currentUser.getId());
@@ -63,7 +77,7 @@ public class LibraryService {
                     dto.setOwner(isOwner);
                     dto.setShared(isEditor || isViewer);
                     dto.setCanEdit(isOwner || isEditor);
-                    dto.setItemCount(library.getItems().stream().filter(i -> i.getParentItem() == null).count());
+                    dto.setItemCount(itemCounts.getOrDefault(library.getIdLibrary(), 0L));
                     if (!isOwner) {
                         dto.setOwnerUsername(library.getUsuario().getUsername());
                     }
@@ -199,7 +213,8 @@ public class LibraryService {
         dto.setOwner(isOwner);
         dto.setShared(isEditor || isViewer);
         dto.setCanEdit(isOwner || isEditor);
-        dto.setItemCount(library.getItems().stream().filter(i -> i.getParentItem() == null).count());
+        dto.setItemCount(itemRepository.countRootItemsByLibraries(List.of(library))
+                .stream().findFirst().map(row -> (Long) row[1]).orElse(0L));
         if (!isOwner) {
             dto.setOwnerUsername(library.getUsuario().getUsername());
         }

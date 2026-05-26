@@ -15,8 +15,8 @@ services:
     container_name: listme-db
     environment:
       - POSTGRES_DB=list_me
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=angelc45
+      - POSTGRES_USER=${LISTME_DB_USERNAME}
+      - POSTGRES_PASSWORD=${LISTME_DB_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     restart: unless-stopped

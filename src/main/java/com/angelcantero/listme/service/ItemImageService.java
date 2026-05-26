@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 /**
  * <p><strong>ItemImageService</strong></p>
  * <p>Servicio para la gestión de imágenes de ítems.</p>
- * <p>Maneja las operaciones CRUD y marking de imagenes favoritas.</p>
+ * <p>Maneja las operaciones CRUD y el marcado de imágenes favoritas.</p>
  *
  * @author Angel Cantero
  * @since 1.0.0
@@ -62,7 +62,7 @@ public class ItemImageService {
      */
     public List<ItemImageDTO> getImagesByItemId(Long itemId) {
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new ResourceNotFoundException("Item not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ítem no encontrado"));
         validateLibraryReadAccess(item.getLibrary().getIdLibrary());
         return itemImageRepository.findByItemIdItem(itemId).stream().map(this::mapToDTO).collect(Collectors.toList());
     }
@@ -76,7 +76,7 @@ public class ItemImageService {
     @Transactional
     public ItemImageDTO createImage(ItemImageDTO dto) {
         Item item = itemRepository.findById(dto.getIdItem())
-                .orElseThrow(() -> new ResourceNotFoundException("Item not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ítem no encontrado"));
         validateLibraryWriteAccess(item.getLibrary().getIdLibrary());
 
         ItemImage image = new ItemImage();
@@ -103,7 +103,7 @@ public class ItemImageService {
     @Transactional
     public ItemImageDTO updateImage(Long id, ItemImageDTO dto) {
         ItemImage image = itemImageRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Image not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Imagen no encontrada"));
         validateLibraryWriteAccess(image.getItem().getLibrary().getIdLibrary());
 
         if (dto.getImageUri() != null) {
@@ -132,14 +132,14 @@ public class ItemImageService {
     @Transactional
     public ItemImageDTO setFavorite(Long itemId, Long imageId) {
         ItemImage image = itemImageRepository.findById(imageId)
-                .orElseThrow(() -> new ResourceNotFoundException("Image not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Imagen no encontrada"));
 
         if (image.getItem() == null) {
             throw new ResourceNotFoundException("La imagen no tiene un ítem asociado");
         }
 
         if (!image.getItem().getIdItem().equals(itemId)) {
-            throw new ResourceNotFoundException("Image not found for this item");
+            throw new ResourceNotFoundException("Imagen no encontrada para este ítem");
         }
         validateLibraryWriteAccess(image.getItem().getLibrary().getIdLibrary());
 
@@ -159,7 +159,7 @@ public class ItemImageService {
     @Transactional
     public ItemImageDTO uploadImage(MultipartFile file, Long itemId) throws IOException {
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new ResourceNotFoundException("Item not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ítem no encontrado"));
         validateLibraryWriteAccess(item.getLibrary().getIdLibrary());
 
         String remoteUrl = firebaseStorageService.uploadImage(file, itemId);
@@ -182,10 +182,10 @@ public class ItemImageService {
      */
     public String getImageUrl(Long itemId, Long imageId) {
         ItemImage image = itemImageRepository.findById(imageId)
-                .orElseThrow(() -> new ResourceNotFoundException("Image not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Imagen no encontrada"));
 
         if (image.getItem() == null || !image.getItem().getIdItem().equals(itemId)) {
-            throw new ResourceNotFoundException("Image not found for this item");
+            throw new ResourceNotFoundException("Imagen no encontrada para este ítem");
         }
 
         validateLibraryReadAccess(image.getItem().getLibrary().getIdLibrary());
@@ -200,7 +200,7 @@ public class ItemImageService {
     @Transactional
     public void deleteImage(Long id) {
         ItemImage image = itemImageRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Image not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Imagen no encontrada"));
         validateLibraryWriteAccess(image.getItem().getLibrary().getIdLibrary());
         itemImageRepository.delete(image);
     }
@@ -216,7 +216,7 @@ public class ItemImageService {
                 .forEach(img -> img.setIsFavorite(false));
         itemImageRepository.flush();
         image.setIsFavorite(true);
-        // Keep item.remoteImageUrl in sync with the favorite image URL
+        // Sincroniza remoteImageUrl del ítem con la URL de la imagen favorita
         if (image.getItem() != null && image.getRemoteImageUrl() != null) {
             image.getItem().setRemoteImageUrl(image.getRemoteImageUrl());
         }

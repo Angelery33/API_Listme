@@ -28,7 +28,7 @@ public interface LibraryRepository extends JpaRepository<Library, Long> {
      * @param usuario el usuario que accede
      * @return lista de bibliotecas accesibles
      */
-    @Query("SELECT DISTINCT l FROM Library l LEFT JOIN FETCH l.items i LEFT JOIN l.editors e LEFT JOIN l.viewers v WHERE l.usuario = :usuario OR :usuario MEMBER OF l.editors OR :usuario MEMBER OF l.viewers")
+    @Query("SELECT DISTINCT l FROM Library l LEFT JOIN FETCH l.editors LEFT JOIN FETCH l.viewers WHERE l.usuario = :usuario OR :usuario MEMBER OF l.editors OR :usuario MEMBER OF l.viewers")
     List<Library> findAllAccessibleByUser(@Param("usuario") Usuario usuario);
 
     /**

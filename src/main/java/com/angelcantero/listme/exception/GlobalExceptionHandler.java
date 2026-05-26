@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.angelcantero.listme.dto.ErrorResponseDTO;
+import com.angelcantero.listme.exception.InvalidRefreshTokenException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -106,6 +107,74 @@ public class GlobalExceptionHandler {
                 null
         );
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
+    /**
+     * Maneja tokens de refresco expirados o inválidos.
+     *
+     * @param ex excepción lanzada por {@link com.angelcantero.listme.service.RefreshTokenService}.
+     * @return {@link ResponseEntity} con estado HTTP 401 y el mensaje de la excepción.
+     */
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidRefreshToken(InvalidRefreshTokenException ex) {
+        ErrorResponseDTO response = new ErrorResponseDTO(
+                HttpStatus.UNAUTHORIZED.value(),
+                ex.getMessage(),
+                System.currentTimeMillis(),
+                null
+        );
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
+    /**
+     * Maneja intentos de acceder a recursos ajenos (invitaciones, solicitudes de amistad de otro usuario).
+     *
+     * @param ex excepción lanzada por los servicios cuando el usuario no tiene permiso sobre el recurso.
+     * @return {@link ResponseEntity} con estado HTTP 403 y el mensaje de la excepción.
+     */
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<ErrorResponseDTO> handleSecurityException(SecurityException ex) {
+        ErrorResponseDTO response = new ErrorResponseDTO(
+                HttpStatus.FORBIDDEN.value(),
+                ex.getMessage(),
+                System.currentTimeMillis(),
+                null
+        );
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
+    /**
+     * Maneja transiciones de estado inválidas (p. ej. aceptar una solicitud ya respondida).
+     *
+     * @param ex excepción lanzada cuando la entidad no está en el estado esperado.
+     * @return {@link ResponseEntity} con estado HTTP 409 y el mensaje de la excepción.
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponseDTO> handleIllegalState(IllegalStateException ex) {
+        ErrorResponseDTO response = new ErrorResponseDTO(
+                HttpStatus.CONFLICT.value(),
+                ex.getMessage(),
+                System.currentTimeMillis(),
+                null
+        );
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+    /**
+     * Maneja argumentos inválidos en operaciones de negocio (p. ej. invitarse a uno mismo).
+     *
+     * @param ex excepción lanzada por los servicios ante parámetros semánticamente incorrectos.
+     * @return {@link ResponseEntity} con estado HTTP 400 y el mensaje de la excepción.
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponseDTO> handleIllegalArgument(IllegalArgumentException ex) {
+        ErrorResponseDTO response = new ErrorResponseDTO(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                System.currentTimeMillis(),
+                null
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     /**

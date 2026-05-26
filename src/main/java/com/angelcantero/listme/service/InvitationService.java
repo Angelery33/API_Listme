@@ -44,7 +44,7 @@ public class InvitationService {
     private Usuario getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
     }
 
     /**
@@ -64,13 +64,13 @@ public class InvitationService {
     public InvitationDTO sendInvitation(Long libraryId, ShareRequest request) {
         Usuario sender = getCurrentUser();
         Library library = libraryRepository.findOwnedById(libraryId, sender)
-                .orElseThrow(() -> new ResourceNotFoundException("Only owner can invite to library"));
+                .orElseThrow(() -> new ResourceNotFoundException("Solo el propietario puede invitar a la biblioteca"));
 
         Usuario receiver = usuarioRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new ResourceNotFoundException("Target user not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario destinatario no encontrado"));
 
         if (sender.getId().equals(receiver.getId())) {
-            throw new IllegalArgumentException("You cannot invite yourself");
+            throw new IllegalArgumentException("No puedes invitarte a ti mismo");
         }
 
         Invitation invitation = Invitation.builder()
@@ -110,10 +110,10 @@ public class InvitationService {
     public void acceptInvitation(Long invitationId) {
         Usuario currentUser = getCurrentUser();
         Invitation invitation = invitationRepository.findById(invitationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Invitation not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Invitación no encontrada"));
 
         if (!invitation.getReceiver().getId().equals(currentUser.getId())) {
-            throw new SecurityException("You can only accept your own invitations");
+            throw new SecurityException("Solo puedes aceptar tus propias invitaciones");
         }
 
         Library library = invitation.getLibrary();
@@ -142,10 +142,10 @@ public class InvitationService {
     public void rejectInvitation(Long invitationId) {
         Usuario currentUser = getCurrentUser();
         Invitation invitation = invitationRepository.findById(invitationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Invitation not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Invitación no encontrada"));
 
         if (!invitation.getReceiver().getId().equals(currentUser.getId())) {
-            throw new SecurityException("You can only reject your own invitations");
+            throw new SecurityException("Solo puedes rechazar tus propias invitaciones");
         }
 
         invitation.setStatus(InvitationStatus.REJECTED);

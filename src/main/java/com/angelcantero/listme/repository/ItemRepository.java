@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.angelcantero.listme.model.Item;
+import com.angelcantero.listme.model.Library;
 import com.angelcantero.listme.model.Usuario;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -48,4 +49,15 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findAllAccessibleByUser(@Param("usuario") Usuario usuario);
 
     long countByLibraryUsuario(Usuario usuario);
+
+    /**
+     * Cuenta los ítems raíz (sin padre) agrupados por biblioteca, para un conjunto de
+     * bibliotecas dado. Devuelve pares [idLibrary, count] para construir un mapa de conteos
+     * sin disparar una query por biblioteca.
+     *
+     * @param libraries lista de bibliotecas a consultar
+     * @return lista de arrays donde el primer elemento es el ID de la biblioteca y el segundo el conteo
+     */
+    @Query("SELECT i.library.idLibrary, COUNT(i) FROM Item i WHERE i.library IN :libraries AND i.parentItem IS NULL GROUP BY i.library.idLibrary")
+    List<Object[]> countRootItemsByLibraries(@Param("libraries") List<Library> libraries);
 }

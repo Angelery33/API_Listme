@@ -1,6 +1,7 @@
 package com.angelcantero.listme.controller;
 
 import com.angelcantero.listme.config.Config;
+import com.angelcantero.listme.exception.ResourceNotFoundException;
 import com.angelcantero.listme.dto.UserStatsDTO;
 import com.angelcantero.listme.model.Usuario;
 import com.angelcantero.listme.repository.ItemRepository;
@@ -62,7 +63,8 @@ public class SystemController {
     @GetMapping("/stats")
     public ResponseEntity<UserStatsDTO> getStats() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Usuario user = usuarioRepository.findByUsername(username).orElseThrow();
+        Usuario user = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         long libraries = libraryRepository.countByUsuario(user);
         long items = itemRepository.countByLibraryUsuario(user);
