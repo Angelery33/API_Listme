@@ -52,7 +52,10 @@ El backend necesita el archivo `firebase-adminsdk.json` para subir imágenes a F
 ### 3. Variables de entorno
 
 ```bash
+# Linux/macOS
 cp .env.example .env
+# Windows
+copy .env.example .env
 ```
 
 Editar `.env` y rellenar los valores necesarios:
@@ -73,6 +76,10 @@ Editar `.env` y rellenar los valores necesarios:
 ## Arrancar con Docker Compose
 
 ```bash
+# Construir la imagen de la API
+docker build -t listme:latest .
+
+# Levantar PostgreSQL y el backend
 docker-compose up -d
 ```
 
@@ -112,13 +119,16 @@ src/main/java/com/angelcantero/listme/
 | Recurso | Prefijo |
 |---------|---------|
 | Autenticación | `/api/v1/auth` |
-| Usuarios | `/api/v1/users` |
-| Listas | `/api/v1/lists` |
+| Listas | `/api/v1/libraries` |
+| Géneros de lista | `/api/v1/library-genres` |
 | Ítems | `/api/v1/items` |
-| Imágenes | `/api/v1/images` |
-| Atributos | `/api/v1/attributes` |
-| Amistades | `/api/v1/friendships` |
+| Imágenes de ítems | `/api/v1/images` |
+| Tipos de atributo | `/api/v1/attribute-types` |
+| Valores de atributo | `/api/v1/attribute-items` |
+| Amistades | `/api/v1/friends` |
 | Invitaciones | `/api/v1/invitations` |
+| Búsqueda externa (proxy) | `/api/v1/search` |
+| Proxy de imágenes externas | `/api/v1/proxy` |
 
 La especificación completa está disponible en Swagger UI una vez arrancado el servidor.
 

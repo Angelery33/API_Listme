@@ -48,11 +48,6 @@ public class SecurityConfig {
 
     /**
      * Orígenes CORS permitidos. Configurable vía variable de entorno {@code LISTME_CORS_ORIGINS}
-     * (valores separados por coma). Por defecto solo se permite el dominio de producción exacto.
-     * Nunca usar wildcards en producción.
-     */
-    /**
-     * Orígenes CORS permitidos. Configurable vía variable de entorno {@code LISTME_CORS_ORIGINS}
      * (valores separados por coma). En desarrollo se incluyen los puertos habituales de Flutter Web
      * (5000, 5001, 7357, 8080, 8081, 3000). En producción se sobreescribe con solo el dominio publicado.
      */
