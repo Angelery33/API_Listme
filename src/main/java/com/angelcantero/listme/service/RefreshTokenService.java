@@ -47,31 +47,22 @@ public class RefreshTokenService {
     }
 
     /**
-     * Crea o actualiza un token de refresco para un usuario.
-     * Si el usuario ya tiene un token, lo renueva con nueva fecha de expiración.
+     * Crea un nuevo token de refresco para un usuario.
+     * Cada dispositivo recibe su propio token, permitiendo sesiones simultáneas.
      *
      * @param userId el ID del usuario
-     * @return el refresh token creado/actualizado
+     * @return el refresh token creado
      * @throws ResourceNotFoundException si el usuario no existe
      */
     @Transactional
     public RefreshToken createRefreshToken(Long userId) {
         Usuario usuario = usuarioRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + userId));
-        
-        Optional<RefreshToken> existingToken = refreshTokenRepository.findByUsuario(usuario);
 
-        RefreshToken refreshToken;
-        if (existingToken.isPresent()) {
-            refreshToken = existingToken.get();
-            refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
-            refreshToken.setToken(UUID.randomUUID().toString());
-        } else {
-            refreshToken = new RefreshToken();
-            refreshToken.setUsuario(usuario);
-            refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
-            refreshToken.setToken(UUID.randomUUID().toString());
-        }
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setUsuario(usuario);
+        refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
+        refreshToken.setToken(UUID.randomUUID().toString());
 
         return refreshTokenRepository.save(refreshToken);
     }

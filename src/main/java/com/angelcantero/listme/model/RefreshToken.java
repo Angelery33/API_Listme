@@ -44,8 +44,9 @@ public class RefreshToken {
 
     /**
      * Usuario propietario del token de refresco.
+     * ManyToOne permite múltiples tokens activos por usuario (multi-dispositivo).
      */
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "usuario_id", referencedColumnName = "id")
     private Usuario usuario;
 }
