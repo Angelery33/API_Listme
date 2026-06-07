@@ -291,6 +291,43 @@ public class LibraryService {
     }
 
     /**
+     * Cambia el rol de un colaborador existente en una biblioteca.
+     *
+     * <p>Solo el propietario puede ejecutar esta operación. Mueve al usuario entre
+     * los conjuntos de editores y viewers según el {@code newRole} solicitado.</p>
+     *
+     * @param libraryId ID de la biblioteca
+     * @param userId    ID del colaborador cuyo rol se va a cambiar
+     * @param newRole   nuevo rol: {@code "editor"} o {@code "viewer"}
+     * @throws ResourceNotFoundException si la biblioteca no existe, el usuario no es
+     *         propietario, o el colaborador no pertenece a la biblioteca
+     */
+    @Transactional
+    public void updateCollaboratorRole(Long libraryId, Long userId, String newRole) {
+        Usuario currentUser = getCurrentUser();
+        Library library = libraryRepository.findOwnedById(libraryId, currentUser)
+                .orElseThrow(() -> new ResourceNotFoundException("Solo el propietario puede modificar colaboradores"));
+
+        boolean wasCollaborator = library.getEditors().removeIf(u -> u.getId().equals(userId))
+                || library.getViewers().removeIf(u -> u.getId().equals(userId));
+
+        if (!wasCollaborator) {
+            throw new ResourceNotFoundException("El usuario no es colaborador de esta biblioteca");
+        }
+
+        Usuario collaborator = usuarioRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + userId));
+
+        if ("editor".equals(newRole)) {
+            library.getEditors().add(collaborator);
+        } else {
+            library.getViewers().add(collaborator);
+        }
+
+        libraryRepository.save(library);
+    }
+
+    /**
      * Permite al usuario actual abandonar una biblioteca compartida.
      *
      * <p>El propietario no puede abandonar su propia biblioteca.</p>

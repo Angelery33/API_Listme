@@ -3,6 +3,7 @@ package com.angelcantero.listme.controller;
 import com.angelcantero.listme.config.Config;
 import com.angelcantero.listme.dto.CollaboratorDTO;
 import com.angelcantero.listme.dto.LibraryDTO;
+import com.angelcantero.listme.dto.UpdateCollaboratorRoleRequest;
 import com.angelcantero.listme.service.LibraryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -120,6 +121,23 @@ public class LibraryController {
             @PathVariable Long id,
             @PathVariable Long userId) {
         libraryService.removeCollaborator(id, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Cambia el rol (editor/viewer) de un colaborador de una biblioteca (solo propietario).
+     *
+     * @param id      ID de la biblioteca
+     * @param userId  ID del colaborador
+     * @param request nuevo rol solicitado
+     * @return sin contenido
+     */
+    @PutMapping("/{id}/collaborators/{userId}")
+    public ResponseEntity<Void> updateCollaboratorRole(
+            @PathVariable Long id,
+            @PathVariable Long userId,
+            @Valid @RequestBody UpdateCollaboratorRoleRequest request) {
+        libraryService.updateCollaboratorRole(id, userId, request.getRole());
         return ResponseEntity.noContent().build();
     }
 
