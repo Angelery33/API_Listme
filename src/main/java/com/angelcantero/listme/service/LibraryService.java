@@ -78,6 +78,7 @@ public class LibraryService {
                     dto.setShared(isEditor || isViewer);
                     dto.setCanEdit(isOwner || isEditor);
                     dto.setItemCount(itemCounts.getOrDefault(library.getIdLibrary(), 0L));
+                    dto.setCollaboratorCount(library.getEditors().size() + library.getViewers().size());
                     if (!isOwner) {
                         dto.setOwnerUsername(library.getUsuario().getUsername());
                     }
@@ -213,6 +214,7 @@ public class LibraryService {
         dto.setOwner(isOwner);
         dto.setShared(isEditor || isViewer);
         dto.setCanEdit(isOwner || isEditor);
+        dto.setCollaboratorCount(library.getEditors().size() + library.getViewers().size());
         dto.setItemCount(itemRepository.countRootItemsByLibraries(List.of(library))
                 .stream().findFirst().map(row -> (Long) row[1]).orElse(0L));
         if (!isOwner) {

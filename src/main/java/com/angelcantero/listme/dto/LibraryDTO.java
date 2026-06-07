@@ -152,4 +152,10 @@ public class LibraryDTO {
      * autenticado no es el propietario (lista compartida recibida).
      */
     private String ownerUsername;
+
+    /**
+     * Cantidad de colaboradores (editores + lectores) que tiene la biblioteca.
+     * Permite al propietario saber si su lista está compartida con alguien.
+     */
+    private int collaboratorCount;
 }
